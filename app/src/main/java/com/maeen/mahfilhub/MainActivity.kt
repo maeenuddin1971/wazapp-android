@@ -21,12 +21,9 @@ import com.maeen.mahfilhub.ui.screens.DesignSystemDemoScreen
 import com.maeen.mahfilhub.ui.theme.MahfilHubTheme
 
 class MainActivity : ComponentActivity() {
-    /*
     private var keepSplashScreen = true
-    */
     
     override fun onCreate(savedInstanceState: Bundle?) {
-        /*
         // Install splash screen BEFORE super.onCreate()
         val splashScreen = installSplashScreen()
         
@@ -61,15 +58,12 @@ class MainActivity : ComponentActivity() {
             iconFade.start()
             backgroundFade.start()
         }
-        */
         
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         
-        /*
         // Signal ready as soon as the app starts to trigger the full sequence above
         keepSplashScreen = false
-        */
         
         setContent {
             MahfilHubTheme {
