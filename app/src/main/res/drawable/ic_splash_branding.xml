@@ -1,0 +1,47 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="40dp"
+    android:viewportWidth="200"
+    android:viewportHeight="40">
+    
+    <!-- "MahfilHub" text as path -->
+    <group android:translateX="100" android:translateY="20">
+        <!-- Simplified text representation -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-80,10 L-80,-10 L-75,-10 L-75,0 L-70,0 L-70,-10 L-65,-10 L-65,10 L-70,10 L-70,3 L-75,3 L-75,10 Z"/>
+        
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-60,10 L-60,-10 L-55,-10 Q-50,-10 -50,-5 Q-50,0 -55,0 L-55,10 Z M-55,-7 L-55,-3 Q-52,-3 -52,-5 Q-52,-7 -55,-7 Z"/>
+        
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-45,10 L-45,-10 L-40,-10 L-40,5 L-35,5 L-35,-10 L-30,-10 L-30,10 L-35,10 L-35,8 L-40,8 L-40,10 Z"/>
+        
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-25,10 L-25,-10 L-15,-10 L-15,-7 L-20,-7 L-20,10 Z"/>
+        
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-10,10 L-10,-10 L-5,-10 L-5,10 Z"/>
+        
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,10 L0,-10 L5,-10 L5,10 L10,10 L10,-10 L15,-10 L15,10 Z"/>
+        
+        <!-- "Hub" part with accent color -->
+        <path
+            android:fillColor="#FF9800"
+            android:pathData="M25,10 L25,-10 L30,-10 L30,0 L35,0 L35,-10 L40,-10 L40,10 L35,10 L35,3 L30,3 L30,10 Z"/>
+        
+        <path
+            android:fillColor="#FF9800"
+            android:pathData="M45,10 L45,-10 L50,-10 L50,5 L55,5 L55,-10 L60,-10 L60,10 Z"/>
+        
+        <path
+            android:fillColor="#FF9800"
+            android:pathData="M65,10 L65,-10 L70,-10 Q75,-10 75,-5 L75,5 Q75,10 70,10 Z M70,-7 L70,7 Q72,7 72,5 L72,-5 Q72,-7 70,-7 Z"/>
+    </group>
+</vector>

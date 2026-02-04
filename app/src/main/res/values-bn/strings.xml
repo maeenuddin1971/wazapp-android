@@ -1,0 +1,181 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">মাহফিল হাব</string>
+    
+    <!-- Common Actions -->
+    <string name="action_continue">চালিয়ে যান</string>
+    <string name="action_submit">সাবমিট করুন</string>
+    <string name="action_cancel">বাতিল করুন</string>
+    <string name="action_save">সংরক্ষণ করুন</string>
+    <string name="action_delete">মুছুন</string>
+    <string name="action_edit">সম্পাদনা করুন</string>
+    <string name="action_search">অনুসন্ধান করুন</string>
+    <string name="action_filter">ফিল্টার করুন</string>
+    <string name="action_retry">পুনরায় চেষ্টা করুন</string>
+    <string name="action_learn_more">আরও জানুন</string>
+    <string name="action_view_details">বিস্তারিত দেখুন</string>
+    <string name="action_close">বন্ধ করুন</string>
+    <string name="action_back">পিছনে</string>
+    <string name="action_next">পরবর্তী</string>
+    <string name="action_skip">এড়িয়ে যান</string>
+    <string name="action_done">সম্পন্ন</string>
+    <string name="action_start">শুরু করুন</string>
+    
+    <!-- Authentication -->
+    <string name="auth_login">লগইন</string>
+    <string name="auth_register">নিবন্ধন করুন</string>
+    <string name="auth_logout">লগআউট</string>
+    <string name="auth_email">ইমেইল</string>
+    <string name="auth_password">পাসওয়ার্ড</string>
+    <string name="auth_confirm_password">পাসওয়ার্ড নিশ্চিত করুন</string>
+    <string name="auth_forgot_password">পাসওয়ার্ড ভুলে গেছেন?</string>
+    <string name="auth_sign_in_google">গুগল দিয়ে সাইন ইন করুন</string>
+    <string name="auth_sign_in_facebook">ফেসবুক দিয়ে সাইন ইন করুন</string>
+    <string name="auth_or">অথবা</string>
+    <string name="auth_no_account">অ্যাকাউন্ট নেই?</string>
+    <string name="auth_have_account">ইতিমধ্যে অ্যাকাউন্ট আছে?</string>
+    <string name="auth_guest_mode">অতিথি হিসেবে চালিয়ে যান</string>
+    
+    <!-- Input Fields -->
+    <string name="input_name">নাম</string>
+    <string name="input_phone">ফোন নম্বর</string>
+    <string name="input_search_hint">অনুসন্ধান করুন…</string>
+    <string name="input_search_events">মাহফিল খুঁজুন…</string>
+    <string name="input_enter_name">আপনার নাম লিখুন</string>
+    <string name="input_enter_email">আপনার ইমেইল লিখুন</string>
+    <string name="input_enter_password">পাসওয়ার্ড লিখুন</string>
+    
+    <!-- Events -->
+    <string name="event_title">ইভেন্ট</string>
+    <string name="event_upcoming">আসন্ন</string>
+    <string name="event_past">অতীত</string>
+    <string name="event_today">আজ</string>
+    <string name="event_details">ইভেন্ট বিস্তারিত</string>
+    <string name="event_location">স্থান</string>
+    <string name="event_date">তারিখ</string>
+    <string name="event_time">সময়</string>
+    <string name="event_maulana">মাওলানা</string>
+    <string name="event_description">বিবরণ</string>
+    <string name="event_sponsored">স্পন্সরড</string>
+    <string name="event_set_reminder">রিমাইন্ডার সেট করুন</string>
+    <string name="event_share">ইভেন্ট শেয়ার করুন</string>
+    
+    <!-- Location -->
+    <string name="location_division">বিভাগ</string>
+    <string name="location_district">জেলা</string>
+    <string name="location_upazila">উপজেলা</string>
+    <string name="location_union">ইউনিয়ন</string>
+    <string name="location_village">গ্রাম</string>
+    <string name="location_para">পাড়া</string>
+    <string name="location_select">স্থান নির্বাচন করুন</string>
+    
+    <!-- Reminders -->
+    <string name="reminder_email">ইমেইল রিমাইন্ডার</string>
+    <string name="reminder_alarm">অ্যালার্ম রিমাইন্ডার</string>
+    <string name="reminder_both">উভয়</string>
+    <string name="reminder_set">রিমাইন্ডার সেট হয়েছে</string>
+    <string name="reminder_removed">রিমাইন্ডার সরানো হয়েছে</string>
+    
+    <!-- Maulana -->
+    <string name="maulana_profile">মাওলানা প্রোফাইল</string>
+    <string name="maulana_verified">যাচাইকৃত</string>
+    <string name="maulana_list">মাওলানা তালিকা</string>
+    <string name="maulana_events">এই মাওলানার ইভেন্ট</string>
+    
+    <!-- Status Messages -->
+    <string name="status_loading">লোড হচ্ছে…</string>
+    <string name="status_success">সফল</string>
+    <string name="status_error">ত্রুটি</string>
+    <string name="status_no_internet">ইন্টারনেট সংযোগ নেই</string>
+    <string name="status_try_again">অনুগ্রহ করে আবার চেষ্টা করুন</string>
+    
+    <!-- Empty States -->
+    <string name="empty_no_events">কোন ইভেন্ট পাওয়া যায়নি</string>
+    <string name="empty_no_events_desc">আপনার মানদণ্ডের সাথে মিলে এমন কোন ইভেন্ট নেই</string>
+    <string name="empty_no_results">কোন ফলাফল পাওয়া যায়নি</string>
+    <string name="empty_no_results_desc">আপনার অনুসন্ধান বা ফিল্টার সামঞ্জস্য করার চেষ্টা করুন</string>
+    
+    <!-- Error States -->
+    <string name="error_generic">কিছু ভুল হয়েছে</string>
+    <string name="error_network">নেটওয়ার্ক ত্রুটি ঘটেছে</string>
+    <string name="error_server">সার্ভার ত্রুটি ঘটেছে</string>
+    <string name="error_invalid_email">অবৈধ ইমেইল ঠিকানা</string>
+    <string name="error_invalid_password">পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে</string>
+    <string name="error_password_mismatch">পাসওয়ার্ড মিলছে না</string>
+    <string name="error_required_field">এই ক্ষেত্রটি প্রয়োজনীয়</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">হোম</string>
+    <string name="nav_events">ইভেন্ট</string>
+    <string name="nav_maulana">মাওলানা</string>
+    <string name="nav_profile">প্রোফাইল</string>
+    <string name="nav_settings">সেটিংস</string>
+    
+    <!-- Settings -->
+    <string name="settings_language">ভাষা</string>
+    <string name="settings_theme">থিম</string>
+    <string name="settings_notifications">বিজ্ঞপ্তি</string>
+    <string name="settings_about">সম্পর্কে</string>
+    <string name="settings_privacy">গোপনীয়তা নীতি</string>
+    <string name="settings_terms">সেবার শর্তাবলী</string>
+    
+    <!-- Design System Demo -->
+    <string name="demo_title">মাহফিল হাব ডিজাইন সিস্টেম</string>
+    <string name="demo_colors">রঙ প্যালেট</string>
+    <string name="demo_buttons">বাটন</string>
+    <string name="demo_inputs">ইনপুট ফিল্ড</string>
+    <string name="demo_cards">কার্ড</string>
+    <string name="demo_badges">ব্যাজ</string>
+    <string name="demo_typography">টাইপোগ্রাফি</string>
+    <string name="demo_states">স্টেট কম্পোনেন্ট</string>
+    <string name="demo_primary_button">প্রাথমিক বাটন</string>
+    <string name="demo_secondary_button">সেকেন্ডারি বাটন</string>
+    <string name="demo_tertiary_button">টার্শিয়ারি বাটন</string>
+    <string name="demo_small_button">ছোট বাটন</string>
+    <string name="demo_disabled">নিষ্ক্রিয়</string>
+    <string name="demo_standard_card">স্ট্যান্ডার্ড কার্ড</string>
+    <string name="demo_standard_card_desc">এটি একটি স্ট্যান্ডার্ড কার্ড কম্পোনেন্ট যা ইভেন্ট তথ্য প্রদর্শনের জন্য ব্যবহৃত হয়।</string>
+    <string name="demo_elevated_card">এলিভেটেড কার্ড</string>
+    <string name="demo_elevated_card_desc">গুরুত্বপূর্ণ কন্টেন্টের জন্য</string>
+    <string name="demo_outlined_card">আউটলাইন কার্ড</string>
+    <string name="demo_outlined_card_desc">কম গুরুত্বপূর্ণ কন্টেন্টের জন্য</string>
+    <string name="demo_verified">যাচাইকৃত</string>
+    <string name="demo_active">সক্রিয়</string>
+    <string name="demo_upcoming">আসন্ন</string>
+    
+    <!-- Accessibility -->
+    <string name="cd_search">অনুসন্ধান</string>
+    <string name="cd_filter">ফিল্টার</string>
+    <string name="cd_close">বন্ধ করুন</string>
+    <string name="cd_back">পিছনে</string>
+    <string name="cd_menu">মেনু</string>
+    <string name="cd_verified_badge">যাচাইকৃত ব্যাজ</string>
+    <string name="cd_show_password">পাসওয়ার্ড দেখান</string>
+    <string name="cd_hide_password">পাসওয়ার্ড লুকান</string>
+    
+    <!-- Onboarding -->
+    <string name="onboarding_welcome">মাহফিল হাবে স্বাগতম</string>
+    <string name="onboarding_title_1">ইসলামিক ইভেন্ট আবিষ্কার করুন</string>
+    <string name="onboarding_desc_1">আপনার কাছাকাছি মাহফিল ইভেন্ট খুঁজুন এবং অংশগ্রহণ করুন</string>
+    <string name="onboarding_title_2">সম্প্রদায়ের সাথে সংযুক্ত হন</string>
+    <string name="onboarding_desc_2">সম্প্রদায়ে যোগ দিন এবং আপনার আধ্যাত্মিক যাত্রা সমৃদ্ধ করুন</string>
+    <string name="onboarding_title_3">কোন ইভেন্ট মিস করবেন না</string>
+    <string name="onboarding_desc_3">রিমাইন্ডার সেট করুন এবং আসন্ন ইভেন্টগুলির সাথে আপডেট থাকুন</string>
+    
+    <!-- Filters -->
+    <string name="filter_all">সব</string>
+    <string name="filter_today">আজ</string>
+    <string name="filter_this_week">এই সপ্তাহ</string>
+    <string name="filter_this_month">এই মাস</string>
+    <string name="filter_apply">ফিল্টার প্রয়োগ করুন</string>
+    <string name="filter_clear">ফিল্টার সাফ করুন</string>
+    
+    <!-- Time -->
+    <string name="time_just_now">এইমাত্র</string>
+    <string name="time_minutes_ago">%d মিনিট আগে</string>
+    <string name="time_hours_ago">%d ঘন্টা আগে</string>
+    <string name="time_days_ago">%d দিন আগে</string>
+    <string name="time_today">আজ</string>
+    <string name="time_tomorrow">আগামীকাল</string>
+    <string name="time_yesterday">গতকাল</string>
+</resources>

@@ -1,0 +1,317 @@
+# MahfilHub Android App - Development Rules
+
+## Project Overview
+- **App Name**: MahfilHub
+- **Purpose**: Islamic event management platform for public users
+- **Target Users**: Public users (non-registered) and Normal registered users (Google/Facebook login)
+- **Admin/Maulana**: Managed via separate web platform
+
+## Language Support
+- **Supported Languages**: English and Bengali (Bangla)
+- **Default Language**: Bengali
+- **String Resources**: ALL user-facing text MUST use string resources from strings.xml
+- **Translation Files**:
+  - English: `res/values/strings.xml`
+  - Bengali: `res/values-bn/strings.xml`
+
+## Design System Rules
+
+### Colors
+- **ALWAYS** use `MaterialTheme.colorScheme.*` for colors
+- **NEVER** hardcode color values in composables
+- **Primary Color**: Teal (#00897B for light, #4DB6AC for dark)
+- **Secondary Color**: Green (#66BB6A)
+- **Tertiary Color**: Orange (#FF9800) for accents and sponsored badges
+- **Background**: Cream (#F5F5F0) for light mode, Dark (#121212) for dark mode
+
+### Typography
+- **ALWAYS** use `MaterialTheme.typography.*` for text styles
+- **NEVER** hardcode font sizes or weights
+- **Bengali Font**: System default (TODO: Add Noto Sans Bengali)
+- Available styles: displayLarge, displayMedium, displaySmall, headlineLarge, headlineMedium, headlineSmall, titleLarge, titleMedium, titleSmall, bodyLarge, bodyMedium, bodySmall, labelLarge, labelMedium, labelSmall
+
+### Spacing
+- **ALWAYS** use `Spacing.*` object for padding and margins
+- **NEVER** hardcode dp values
+- Available: extraSmall (4dp), small (8dp), medium (16dp), large (24dp), extraLarge (32dp), huge (48dp)
+
+### Corner Radius
+- **ALWAYS** use `CornerRadius.*` for rounded corners
+- Available: small (4dp), medium (8dp), large (12dp), extraLarge (16dp), round (24dp)
+
+### Elevation
+- **ALWAYS** use `Elevation.*` for shadows
+- Available: none (0dp), small (1dp), medium (2dp), large (4dp), extraLarge (8dp)
+
+## Component Usage Rules
+
+### Buttons
+- **Primary Actions**: Use `PrimaryButton` (e.g., Submit, Login, Continue)
+- **Secondary Actions**: Use `SecondaryButton` (e.g., Cancel, Learn More)
+- **Tertiary Actions**: Use `TertiaryButton` (e.g., Skip, Back)
+- **Compact Spaces**: Use `SmallButton`
+- **Loading State**: Set `isLoading = true` on PrimaryButton
+
+### Cards
+- **Standard Content**: Use `MahfilCard` (2dp elevation)
+- **Featured/Important**: Use `ElevatedMahfilCard` (4dp elevation)
+- **Less Important**: Use `OutlinedMahfilCard` (bordered)
+- **List Items**: Use `CompactCard`
+
+### Text Fields
+- **Standard Input**: Use `MahfilTextField`
+- **Password Input**: Use `PasswordTextField` (includes visibility toggle)
+- **Search Input**: Use `SearchTextField` (rounded corners)
+
+### Badges
+- **Maulana Verification**: Use `VerifiedBadge` with appropriate size
+- **Event Status**: Use `StatusBadge` with custom text and colors
+- **Notification Count**: Use `CountBadge`
+- **Sponsored Events**: Use `SponsoredBadge`
+
+### State Components
+- **Loading**: Use `LoadingIndicator` or `FullScreenLoading`
+- **No Data**: Use `EmptyState` with title, subtitle, and optional action
+- **Errors**: Use `ErrorState` with retry action
+- **Dividers**: Use `DividerWithText` for "OR" style separators
+
+## Code Organization
+
+### Package Structure
+```
+com.maeen.mahfilhub/
+├── ui/
+│   ├── theme/          # Design tokens (Color, Type, Theme, Dimensions)
+│   ├── components/     # Reusable UI components
+│   ├── screens/        # App screens
+│   └── navigation/     # Navigation setup (TODO)
+├── data/               # Data layer (TODO)
+│   ├── model/         # Data models
+│   ├── repository/    # Repositories
+│   └── remote/        # API services
+├── domain/            # Business logic (TODO)
+│   └── usecase/       # Use cases
+└── util/              # Utilities (TODO)
+```
+
+### File Naming
+- **Screens**: `*Screen.kt` (e.g., `HomeScreen.kt`, `EventDetailScreen.kt`)
+- **Components**: Descriptive names (e.g., `Buttons.kt`, `Cards.kt`)
+- **ViewModels**: `*ViewModel.kt` (e.g., `HomeViewModel.kt`)
+- **Repositories**: `*Repository.kt` (e.g., `EventRepository.kt`)
+
+## String Resources Rules
+
+### Naming Convention
+- **Actions**: `action_*` (e.g., `action_submit`, `action_cancel`)
+- **Authentication**: `auth_*` (e.g., `auth_login`, `auth_password`)
+- **Input Fields**: `input_*` (e.g., `input_name`, `input_search_hint`)
+- **Events**: `event_*` (e.g., `event_title`, `event_location`)
+- **Location**: `location_*` (e.g., `location_division`, `location_district`)
+- **Reminders**: `reminder_*` (e.g., `reminder_email`, `reminder_alarm`)
+- **Maulana**: `maulana_*` (e.g., `maulana_profile`, `maulana_verified`)
+- **Status**: `status_*` (e.g., `status_loading`, `status_error`)
+- **Empty States**: `empty_*` (e.g., `empty_no_events`)
+- **Errors**: `error_*` (e.g., `error_network`, `error_invalid_email`)
+- **Navigation**: `nav_*` (e.g., `nav_home`, `nav_events`)
+- **Settings**: `settings_*` (e.g., `settings_language`, `settings_theme`)
+- **Content Descriptions**: `cd_*` (e.g., `cd_search`, `cd_back`)
+- **Onboarding**: `onboarding_*` (e.g., `onboarding_welcome`)
+- **Filters**: `filter_*` (e.g., `filter_all`, `filter_today`)
+- **Time**: `time_*` (e.g., `time_today`, `time_yesterday`)
+
+### Usage in Composables
+```kotlin
+// ✅ CORRECT - Using string resources
+Text(text = stringResource(R.string.action_submit))
+
+// ❌ WRONG - Hardcoded strings
+Text(text = "Submit")
+Text(text = "সাবমিট করুন")
+```
+
+## Theme Support
+
+### Dark Mode
+- **ALWAYS** support both light and dark themes
+- **NEVER** hardcode colors that don't adapt to theme
+- Test all screens in both themes
+
+### Dynamic Color
+- **Disabled** by default for consistent branding
+- Can be enabled per user preference (future feature)
+
+## Best Practices
+
+### Compose
+1. **State Hoisting**: Lift state to the appropriate level
+2. **Reusability**: Create reusable components in `ui/components/`
+3. **Preview**: Add `@Preview` for both light and dark themes
+4. **Modifiers**: Pass modifiers as parameters for flexibility
+5. **Remember**: Use `remember` for state that survives recomposition
+
+### Performance
+1. **Lazy Lists**: Use `LazyColumn`/`LazyRow` for scrollable lists
+2. **Keys**: Provide stable keys for list items
+3. **Derivation**: Use `derivedStateOf` for computed values
+4. **Side Effects**: Use appropriate side effect APIs
+
+### Accessibility
+1. **Content Descriptions**: Provide for all icons and images
+2. **Semantic Properties**: Use semantic modifiers
+3. **Touch Targets**: Minimum 48dp for interactive elements
+4. **Contrast**: Ensure proper color contrast ratios
+
+## Feature Implementation Checklist
+
+When implementing a new feature:
+- [ ] Create data models in `data/model/`
+- [ ] Implement repository in `data/repository/`
+- [ ] Create use case in `domain/usecase/`
+- [ ] Implement ViewModel with StateFlow
+- [ ] Create UI screen using design system components
+- [ ] Add string resources for both English and Bengali
+- [ ] Support both light and dark themes
+- [ ] Add loading, error, and empty states
+- [ ] Test on different screen sizes
+- [ ] Add accessibility support
+- [ ] Write unit tests for ViewModel and use cases
+
+## API Integration Rules (Future)
+
+### Network Layer
+- Use Retrofit for REST API calls
+- Use Ktor for GraphQL (if needed)
+- Implement proper error handling
+- Use sealed classes for API responses
+
+### Data Flow
+```
+UI Layer (Composables)
+    ↓
+ViewModel (StateFlow/SharedFlow)
+    ↓
+Use Case (Business Logic)
+    ↓
+Repository (Data Source Abstraction)
+    ↓
+Remote Data Source (API) / Local Data Source (Room)
+```
+
+## Authentication Rules
+
+### OAuth Integration
+- **Google Sign-In**: Use Google Identity Services
+- **Facebook Sign-In**: Use Facebook SDK
+- **Guest Mode**: Allow browsing without login
+- **Token Management**: Store securely using EncryptedSharedPreferences
+
+## Event Management
+
+### Event Display
+- Show sponsored events after every 3 regular events
+- Clearly label sponsored events with `SponsoredBadge`
+- Support search by date, location, and Maulana name
+- Implement hierarchical location filtering (Division → District → Upazila → Union → Village → Para)
+
+### Reminders
+- Support Email reminders
+- Support Alarm reminders (local notifications)
+- Support Both options
+- Request notification permission on Android 13+
+
+## Testing Rules
+
+### Unit Tests
+- Test ViewModels with fake repositories
+- Test use cases with mock dependencies
+- Test data transformations
+- Aim for >80% code coverage
+
+### UI Tests
+- Test navigation flows
+- Test user interactions
+- Test different states (loading, success, error, empty)
+- Use Compose Testing library
+
+## Version Control
+
+### Commit Messages
+- Use conventional commits format
+- Examples:
+  - `feat: Add event detail screen`
+  - `fix: Fix dark mode color issue`
+  - `refactor: Extract event card component`
+  - `docs: Update README with setup instructions`
+
+### Branching
+- `main`: Production-ready code
+- `develop`: Development branch
+- `feature/*`: Feature branches
+- `bugfix/*`: Bug fix branches
+
+## Documentation
+
+### Code Comments
+- Document complex logic
+- Add KDoc for public APIs
+- Explain "why" not "what"
+
+### README Updates
+- Keep setup instructions current
+- Document new features
+- Update screenshots
+
+## Dependencies
+
+### Core
+- Jetpack Compose (Material 3)
+- Kotlin Coroutines & Flow
+- Hilt for Dependency Injection
+- Navigation Compose
+
+### Network (Future)
+- Retrofit / Ktor
+- OkHttp
+- Gson / Kotlinx Serialization
+
+### Local Storage (Future)
+- Room Database
+- DataStore (Preferences)
+- EncryptedSharedPreferences
+
+### Image Loading (Future)
+- Coil for Compose
+
+### Authentication (Future)
+- Google Identity Services
+- Facebook SDK
+
+## Security Rules
+
+1. **Never** commit API keys or secrets
+2. Use BuildConfig for environment-specific values
+3. Implement certificate pinning for production
+4. Validate all user inputs
+5. Use HTTPS only
+6. Implement proper authentication token refresh
+
+## Performance Targets
+
+- App startup: < 2 seconds
+- Screen transitions: < 300ms
+- API response handling: < 500ms
+- Smooth scrolling: 60 FPS minimum
+
+## Accessibility Targets
+
+- Support TalkBack screen reader
+- Support font scaling up to 200%
+- Minimum touch target: 48dp
+- Color contrast ratio: 4.5:1 minimum
+
+---
+
+**Last Updated**: 2026-02-04
+**Version**: 1.0
+**Status**: Active Development - Phase 1 (Design System) Complete

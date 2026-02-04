@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Main App Theme -->
     <style name="Theme.MahfilHub" parent="android:Theme.Material.Light.NoActionBar" />
+    
+    <!-- Splash Screen Theme - Fast with animation -->
+    <style name="Theme.MahfilHub.Splash" parent="Theme.SplashScreen">
+        <!-- Background color - teal brand color -->
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        
+        <!-- Animated icon in center - white mosque on teal -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        
+        <!-- Animation duration - 400ms allows the system to properly fade in the icon -->
+        <item name="windowSplashScreenAnimationDuration">400</item>
+        
+        <!-- Post splash theme -->
+        <item name="postSplashScreenTheme">@style/Theme.MahfilHub</item>
+    </style>
 </resources>

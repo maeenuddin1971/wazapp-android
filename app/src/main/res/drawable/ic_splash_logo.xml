@@ -1,0 +1,49 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Simple Mosque Icon for Splash Screen - WHITE for visibility on teal background -->
+    <group
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="54"
+        android:translateY="54">
+        
+        <!-- Central Dome -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,-25 C-15,-25 -15,-15 -15,-10 L-15,5 L15,5 L15,-10 C15,-15 15,-25 0,-25 Z"/>
+        
+        <!-- Left Minaret -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-25,-20 L-25,15 L-20,15 L-20,-20 Z"/>
+        
+        <!-- Right Minaret -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M20,-20 L20,15 L25,15 L25,-20 Z"/>
+        
+        <!-- Base -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-30,15 L30,15 L30,20 L-30,20 Z"/>
+        
+        <!-- Crescent on Dome - Orange accent -->
+        <path
+            android:fillColor="#FF9800"
+            android:pathData="M0,-30 C-3,-30 -3,-27 -3,-25 C-3,-23 -1,-23 0,-25 C1,-23 3,-23 3,-25 C3,-27 3,-30 0,-30 Z"/>
+        
+        <!-- Left Minaret Top - Orange accent -->
+        <path
+            android:fillColor="#FF9800"
+            android:pathData="M-22.5,-23 m-2.5,0 a2.5,2.5 0,1 1,5 0 a2.5,2.5 0,1 1,-5 0"/>
+        
+        <!-- Right Minaret Top - Orange accent -->
+        <path
+            android:fillColor="#FF9800"
+            android:pathData="M22.5,-23 m-2.5,0 a2.5,2.5 0,1 1,5 0 a2.5,2.5 0,1 1,-5 0"/>
+    </group>
+</vector>
