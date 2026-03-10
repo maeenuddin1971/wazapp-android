@@ -1,10 +1,13 @@
 package com.maeen.mahfilhub.ui.screens
 
+import android.app.Activity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -21,6 +24,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
 import com.maeen.mahfilhub.ui.theme.*
+import com.maeen.mahfilhub.util.LocaleHelper
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
@@ -44,6 +49,9 @@ fun OnboardingScreen(
     onFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val currentLang = remember { mutableStateOf(LocaleHelper.getLanguage(context)) }
+
     val pages = listOf(
         OnboardingPage(
             titleResId = R.string.onboarding_title_1,
@@ -88,24 +96,37 @@ fun OnboardingScreen(
                 .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Skip button at top right
-            Box(
+            // Top bar: Skip (left) + Language toggle (right)
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                    .padding(horizontal = Spacing.small, vertical = Spacing.small),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Skip button — top left
                 if (pagerState.currentPage < pages.size - 1) {
-                    TextButton(
-                        onClick = onFinished,
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    ) {
+                    TextButton(onClick = onFinished) {
                         Text(
                             text = stringResource(R.string.action_skip),
                             color = Color.White.copy(alpha = 0.8f),
                             style = MaterialTheme.typography.labelLarge
                         )
                     }
+                } else {
+                    Spacer(modifier = Modifier.width(72.dp))
                 }
+
+                // Language toggle — top right
+                LanguageToggle(
+                    currentLanguage = currentLang.value,
+                    onToggle = {
+                        val newLang = LocaleHelper.toggleLanguage(context)
+                        currentLang.value = newLang
+                        // Recreate the activity to apply the new locale
+                        (context as? Activity)?.recreate()
+                    }
+                )
             }
 
             // Pager content
@@ -619,6 +640,66 @@ private fun OnboardingReminderIcon() {
             lineTo(centerX + w * 0.06f, h * 0.78f)
         }
         drawPath(checkPath, orange.copy(alpha = 0.7f), style = Stroke(width = 3f))
+    }
+}
+
+// ---- Language Toggle ----
+
+@Composable
+private fun LanguageToggle(
+    currentLanguage: String,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isEnglish = currentLanguage == LocaleHelper.LANG_ENGLISH
+
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .border(
+                width = 1.5.dp,
+                color = Color.White.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable { onToggle() }
+            .padding(horizontal = 4.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // English option
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    if (isEnglish) AccentOrange else Color.Transparent
+                )
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "English",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (isEnglish) FontWeight.Bold else FontWeight.Normal,
+                color = if (isEnglish) Color.White else Color.White.copy(alpha = 0.6f)
+            )
+        }
+
+        // Bangla option
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    if (!isEnglish) AccentOrange else Color.Transparent
+                )
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "বাংলা",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (!isEnglish) FontWeight.Bold else FontWeight.Normal,
+                color = if (!isEnglish) Color.White else Color.White.copy(alpha = 0.6f)
+            )
+        }
     }
 }
 

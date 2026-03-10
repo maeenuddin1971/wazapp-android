@@ -1,11 +1,14 @@
 package com.maeen.mahfilhub
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -16,6 +19,7 @@ import com.maeen.mahfilhub.ui.screens.DesignSystemDemoScreen
 import com.maeen.mahfilhub.ui.screens.OnboardingScreen
 import com.maeen.mahfilhub.ui.screens.SplashScreen
 import com.maeen.mahfilhub.ui.theme.MahfilHubTheme
+import com.maeen.mahfilhub.util.LocaleHelper
 
 /**
  * App navigation screens in order of appearance.
@@ -28,16 +32,34 @@ private enum class AppScreen {
 
 class MainActivity : ComponentActivity() {
 
+    /**
+     * Apply the user's saved locale before the activity's context is created.
+     */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.applyLocale(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install the system splash screen (brief, before our custom one)
-        val systemSplash = installSplashScreen()
+        installSplashScreen()
 
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        
+        // Use dark style initially so the status bar icons are ALWAYS white from frame 0
+        // This matches the splash theme seamlessly preventing any delays/flashes.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        )
 
         setContent {
-            MahfilHubTheme {
-                var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
+            var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
+            val isDarkTheme = isSystemInDarkTheme()
+            val hasDarkBackground = currentScreen == AppScreen.SPLASH || currentScreen == AppScreen.ONBOARDING
+
+            MahfilHubTheme(
+                darkTheme = isDarkTheme,
+                darkStatusBarIcons = if (hasDarkBackground) false else !isDarkTheme
+            ) {
 
                 AnimatedContent(
                     targetState = currentScreen,

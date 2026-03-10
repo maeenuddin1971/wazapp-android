@@ -4,16 +4,14 @@
     <!-- Main App Theme -->
     <style name="Theme.MahfilHub" parent="android:Theme.Material.Light.NoActionBar" />
     
-    <!-- Splash Screen Theme - Fast with animation -->
+    <!-- Splash Screen Theme - Minimal system splash, blends into custom Compose splash -->
     <style name="Theme.MahfilHub.Splash" parent="Theme.SplashScreen">
-        <!-- Background color - teal brand color -->
+        <!-- Background color - teal brand color to seamlessly blend into custom splash -->
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         
-        <!-- Animated icon in center - white mosque on teal -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
-        
-        <!-- Animation duration - 400ms allows the system to properly fade in the icon -->
-        <item name="windowSplashScreenAnimationDuration">400</item>
+        <!-- Status bar - teal with white icons from the very first frame -->
+        <item name="android:statusBarColor">@color/splash_background</item>
+        <item name="android:windowLightStatusBar">false</item>
         
         <!-- Post splash theme -->
         <item name="postSplashScreenTheme">@style/Theme.MahfilHub</item>

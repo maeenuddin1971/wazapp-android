@@ -81,6 +81,7 @@ private val DarkColorScheme = darkColorScheme(
 @Composable
 fun MahfilHubTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    darkStatusBarIcons: Boolean = !darkTheme,
     // Disable dynamic color to maintain consistent branding
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
@@ -98,8 +99,9 @@ fun MahfilHubTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkStatusBarIcons
         }
     }
 
