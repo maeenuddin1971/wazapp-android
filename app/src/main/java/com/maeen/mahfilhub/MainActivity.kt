@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
+            var currentScreen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(AppScreen.SPLASH) }
             val isDarkTheme = isSystemInDarkTheme()
             val hasDarkBackground = currentScreen == AppScreen.SPLASH || currentScreen == AppScreen.ONBOARDING
 
@@ -63,17 +63,14 @@ class MainActivity : ComponentActivity() {
 
                 AnimatedContent(
                     targetState = currentScreen,
+                    modifier = Modifier.fillMaxSize(),
                     transitionSpec = {
-                        // All screen transitions slide left (forward navigation)
+                        // Forward slide navigation in perfect sync (prevents white gap during transition)
                         slideInHorizontally(
                             initialOffsetX = { fullWidth -> fullWidth },
                             animationSpec = tween(400)
-                        ) + fadeIn(
-                            animationSpec = tween(400)
                         ) togetherWith slideOutHorizontally(
                             targetOffsetX = { fullWidth -> -fullWidth },
-                            animationSpec = tween(400)
-                        ) + fadeOut(
                             animationSpec = tween(400)
                         )
                     },
