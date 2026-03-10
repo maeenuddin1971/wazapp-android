@@ -1,6 +1,7 @@
 <resources>
     <!-- App Name -->
     <string name="app_name">MahfilHub</string>
+    <string name="splash_tagline">Discover Islamic Events Near You</string>
     
     <!-- Common Actions -->
     <string name="action_continue">Continue</string>
@@ -161,6 +162,7 @@
     <string name="onboarding_desc_2">Join the community and enrich your spiritual journey</string>
     <string name="onboarding_title_3">Never Miss an Event</string>
     <string name="onboarding_desc_3">Set reminders and stay updated with upcoming events</string>
+    <string name="onboarding_get_started">Get Started</string>
     
     <!-- Filters -->
     <string name="filter_all">All</string>

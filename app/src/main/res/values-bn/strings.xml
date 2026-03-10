@@ -1,6 +1,7 @@
 <resources>
     <!-- App Name -->
     <string name="app_name">মাহফিল হাব</string>
+    <string name="splash_tagline">আপনার কাছাকাছি ইসলামিক ইভেন্ট আবিষ্কার করুন</string>
     
     <!-- Common Actions -->
     <string name="action_continue">চালিয়ে যান</string>
@@ -161,6 +162,7 @@
     <string name="onboarding_desc_2">সম্প্রদায়ে যোগ দিন এবং আপনার আধ্যাত্মিক যাত্রা সমৃদ্ধ করুন</string>
     <string name="onboarding_title_3">কোন ইভেন্ট মিস করবেন না</string>
     <string name="onboarding_desc_3">রিমাইন্ডার সেট করুন এবং আসন্ন ইভেন্টগুলির সাথে আপডেট থাকুন</string>
+    <string name="onboarding_get_started">শুরু করুন</string>
     
     <!-- Filters -->
     <string name="filter_all">সব</string>
