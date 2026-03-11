@@ -15,7 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.maeen.mahfilhub.ui.screens.DesignSystemDemoScreen
+import com.maeen.mahfilhub.ui.screens.HomeScreen
 import com.maeen.mahfilhub.ui.screens.OnboardingScreen
 import com.maeen.mahfilhub.ui.screens.SplashScreen
 import com.maeen.mahfilhub.ui.theme.MahfilHubTheme
@@ -88,11 +88,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         AppScreen.MAIN -> {
-                            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                                DesignSystemDemoScreen(
-                                    modifier = Modifier.padding(innerPadding)
-                                )
-                            }
+                            HomeScreen()
                         }
                     }
                 }
