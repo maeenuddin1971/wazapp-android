@@ -37,7 +37,7 @@ import com.maeen.mahfilhub.ui.theme.*
 
 
 // ──────────────────────────────────────────────────────────────────────────
-// Home Screen - Main entry after onboarding
+// Home Screen - Main shell with bottom navigation
 // ──────────────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,36 +45,47 @@ import com.maeen.mahfilhub.ui.theme.*
 fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        bottomBar = { HomeBottomNavBar() },
+        bottomBar = {
+            HomeBottomNavBar(
+                selectedIndex = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
+        },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(scrollState)
-        ) {
-            // ── Header with greeting & search ───────────────────────────
-            HomeHeader()
-
-            // ── Quick Actions Grid ──────────────────────────────────────
-            QuickActionsSection()
-
-            // ── Upcoming Events (horizontal scroll) ─────────────────────
-            UpcomingEventsSection()
-
-            // ── Featured Maulana ────────────────────────────────────────
-            FeaturedMaulanaSection()
-
-            // ── Recent Activity ─────────────────────────────────────────
-            RecentActivitySection()
-
-            Spacer(modifier = Modifier.height(Spacing.medium))
+        // Switch between screens based on selected tab
+        when (selectedTab) {
+            0 -> HomeContent(modifier = Modifier.padding(innerPadding))
+            1 -> EventsScreen(modifier = Modifier.padding(innerPadding))
+            // TODO: 2 -> MaulanaScreen()
+            // TODO: 3 -> ProfileScreen()
+            else -> HomeContent(modifier = Modifier.padding(innerPadding))
         }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// Home Content (Tab 0)
+// ══════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun HomeContent(modifier: Modifier = Modifier) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        HomeHeader()
+        QuickActionsSection()
+        UpcomingEventsSection()
+        FeaturedMaulanaSection()
+        RecentActivitySection()
+        Spacer(modifier = Modifier.height(Spacing.medium))
     }
 }
 
@@ -793,9 +804,10 @@ private data class NavItem(
 )
 
 @Composable
-private fun HomeBottomNavBar() {
-    var selectedIndex by remember { mutableIntStateOf(0) }
-
+private fun HomeBottomNavBar(
+    selectedIndex: Int,
+    onTabSelected: (Int) -> Unit
+) {
     val items = listOf(
         NavItem("Home", Icons.Filled.Home, Icons.Outlined.Home),
         NavItem("Events", Icons.Filled.DateRange, Icons.Outlined.DateRange),
@@ -810,7 +822,7 @@ private fun HomeBottomNavBar() {
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 selected = selectedIndex == index,
-                onClick = { selectedIndex = index },
+                onClick = { onTabSelected(index) },
                 icon = {
                     Icon(
                         imageVector = if (selectedIndex == index) item.selectedIcon else item.unselectedIcon,
