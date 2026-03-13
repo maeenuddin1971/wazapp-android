@@ -61,7 +61,7 @@ fun HomeScreen(
         when (selectedTab) {
             0 -> HomeContent(modifier = Modifier.padding(innerPadding))
             1 -> EventsScreen(modifier = Modifier.padding(innerPadding))
-            // TODO: 2 -> MaulanaScreen()
+            2 -> MaulanaScreen(modifier = Modifier.padding(innerPadding))
             // TODO: 3 -> ProfileScreen()
             else -> HomeContent(modifier = Modifier.padding(innerPadding))
         }
