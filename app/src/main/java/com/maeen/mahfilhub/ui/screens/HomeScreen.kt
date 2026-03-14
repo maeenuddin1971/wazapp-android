@@ -1,6 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -25,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 
@@ -847,3 +849,23 @@ private fun HomeBottomNavBar(
         }
     }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// Previews
+// ══════════════════════════════════════════════════════════════════════════
+@Preview(showBackground = true)
+@Composable
+private fun HomeContentPreview() {
+    MahfilHubTheme {
+        HomeContent()
+    }
+}
+
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun HomeScreenDarkPreview() {
+    MahfilHubTheme(darkTheme = true) {
+        HomeContent()
+    }
+}
+

@@ -1,5 +1,6 @@
 package com.maeen.mahfilhub.ui.screens
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
@@ -691,5 +693,26 @@ private fun EmptyEventsPlaceholder() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// Previews
+// ══════════════════════════════════════════════════════════════════════════
+
+@Preview(showBackground = true)
+@Composable
+private fun EventsScreenPreview() {
+    MahfilHubTheme {
+        EventsScreen()
+    }
+}
+
+
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun EventScreenDarkPreview() {
+    MahfilHubTheme(darkTheme = true) {
+        EventsScreen()
     }
 }
