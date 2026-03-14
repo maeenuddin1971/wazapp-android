@@ -62,7 +62,7 @@ fun HomeScreen(
             0 -> HomeContent(modifier = Modifier.padding(innerPadding))
             1 -> EventsScreen(modifier = Modifier.padding(innerPadding))
             2 -> MaulanaScreen(modifier = Modifier.padding(innerPadding))
-            // TODO: 3 -> ProfileScreen()
+            3 -> ProfileScreen(modifier = Modifier.padding(innerPadding))
             else -> HomeContent(modifier = Modifier.padding(innerPadding))
         }
     }
