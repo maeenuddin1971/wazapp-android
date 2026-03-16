@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MahfilHub"
+rootProject.name = "MahfilHub-Android"
 include(":app")
  

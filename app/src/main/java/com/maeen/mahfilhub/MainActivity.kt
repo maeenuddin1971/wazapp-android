@@ -6,29 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.maeen.mahfilhub.ui.screens.HomeScreen
-import com.maeen.mahfilhub.ui.screens.OnboardingScreen
-import com.maeen.mahfilhub.ui.screens.SplashScreen
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.maeen.mahfilhub.ui.navigation.AppNavHost
+import com.maeen.mahfilhub.ui.navigation.AppRoutes
 import com.maeen.mahfilhub.ui.theme.MahfilHubTheme
 import com.maeen.mahfilhub.util.LocaleHelper
-
-/**
- * App navigation screens in order of appearance.
- */
-private enum class AppScreen {
-    SPLASH,
-    ONBOARDING,
-    MAIN
-}
 
 class MainActivity : ComponentActivity() {
 
@@ -44,54 +32,35 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
-        
+
         // Use dark style initially so the status bar icons are ALWAYS white from frame 0
-        // This matches the splash theme seamlessly preventing any delays/flashes.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
 
         setContent {
-            var currentScreen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(AppScreen.SPLASH) }
+            val navController = rememberNavController()
             val isDarkTheme = isSystemInDarkTheme()
-            val hasDarkBackground = currentScreen == AppScreen.SPLASH || currentScreen == AppScreen.ONBOARDING
+
+            // Determine if the current screen has a dark background (for status bar icons)
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+
+            val hasDarkBackground = currentRoute in listOf(
+                AppRoutes.SPLASH,
+                AppRoutes.ONBOARDING,
+                AppRoutes.LOGIN,
+                AppRoutes.REGISTER
+            )
 
             MahfilHubTheme(
                 darkTheme = isDarkTheme,
                 darkStatusBarIcons = if (hasDarkBackground) false else !isDarkTheme
             ) {
-
-                AnimatedContent(
-                    targetState = currentScreen,
-                    modifier = Modifier.fillMaxSize(),
-                    transitionSpec = {
-                        // Forward slide navigation in perfect sync (prevents white gap during transition)
-                        slideInHorizontally(
-                            initialOffsetX = { fullWidth -> fullWidth },
-                            animationSpec = tween(400)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { fullWidth -> -fullWidth },
-                            animationSpec = tween(400)
-                        )
-                    },
-                    label = "screen_navigation"
-                ) { screen ->
-                    when (screen) {
-                        AppScreen.SPLASH -> {
-                            SplashScreen(
-                                onTimeout = { currentScreen = AppScreen.ONBOARDING }
-                            )
-                        }
-                        AppScreen.ONBOARDING -> {
-                            OnboardingScreen(
-                                onFinished = { currentScreen = AppScreen.MAIN }
-                            )
-                        }
-                        AppScreen.MAIN -> {
-                            HomeScreen()
-                        }
-                    }
-                }
+                AppNavHost(
+                    navController = navController,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }

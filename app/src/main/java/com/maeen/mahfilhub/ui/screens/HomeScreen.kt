@@ -45,7 +45,9 @@ import com.maeen.mahfilhub.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEventClick: (Int) -> Unit = {},
+    onMaulanaClick: (Int) -> Unit = {}
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
@@ -62,8 +64,14 @@ fun HomeScreen(
         // Switch between screens based on selected tab
         when (selectedTab) {
             0 -> HomeContent(modifier = Modifier.padding(innerPadding))
-            1 -> EventsScreen(modifier = Modifier.padding(innerPadding))
-            2 -> MaulanaScreen(modifier = Modifier.padding(innerPadding))
+            1 -> EventsScreen(
+                modifier = Modifier.padding(innerPadding),
+                onEventClick = onEventClick
+            )
+            2 -> MaulanaScreen(
+                modifier = Modifier.padding(innerPadding),
+                onMaulanaClick = onMaulanaClick
+            )
             3 -> ProfileScreen(modifier = Modifier.padding(innerPadding))
             else -> HomeContent(modifier = Modifier.padding(innerPadding))
         }

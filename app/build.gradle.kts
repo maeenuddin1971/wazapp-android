@@ -50,6 +50,9 @@ dependencies {
     // SplashScreen API
     implementation("androidx.core:core-splashscreen:1.0.1")
     
+    // Navigation Compose
+    implementation(libs.androidx.navigation.compose)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

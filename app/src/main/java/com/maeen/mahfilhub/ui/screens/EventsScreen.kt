@@ -52,7 +52,7 @@ data class EventItem(
     val category: String = "All"
 )
 
-private val sampleEvents = listOf(
+internal val sampleEvents = listOf(
     EventItem(1, "Friday Waz Mahfil", "Maulana Abdul Karim", "Dhaka Central Mosque, Motijheel", "Mar 14, 2026", "After Jummah", isLive = true, isFeatured = true, attendees = 245, category = "Today"),
     EventItem(2, "Tafseer Al-Quran", "Maulana Tariq Jameel", "Baitul Mukarram National Mosque", "Mar 15, 2026", "After Maghrib", isFeatured = true, attendees = 180, category = "This Week"),
     EventItem(3, "Seerah Conference", "Maulana Hassan Ali", "Chittagong Grand Masjid", "Mar 18, 2026", "10:00 AM", attendees = 320, category = "This Week"),
@@ -70,7 +70,8 @@ private val sampleEvents = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventsScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEventClick: (Int) -> Unit = {}
 ) {
     var selectedFilter by remember { mutableStateOf("All") }
     var searchQuery by remember { mutableStateOf("") }
@@ -128,7 +129,9 @@ fun EventsScreen(
             items(filteredEvents, key = { it.id }) { event ->
                 EventListCard(
                     event = event,
-                    modifier = Modifier.padding(horizontal = Spacing.medium)
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.medium)
+                        .clickable { onEventClick(event.id) }
                 )
                 Spacer(modifier = Modifier.height(Spacing.medium))
             }

@@ -51,7 +51,7 @@ data class MaulanaItem(
     val category: String = "All"
 )
 
-private val sampleMaulanas = listOf(
+internal val sampleMaulanas = listOf(
     MaulanaItem(1, "Maulana Abdul Karim", "Senior Scholar", "Tafseer & Hadith", "Dhaka, Bangladesh", 120, 3, 4520, 4.9f, isVerified = true, category = "Popular"),
     MaulanaItem(2, "Maulana Tariq Jameel", "International Speaker", "Dawah & Islah", "Lahore, Pakistan", 85, 2, 12800, 4.8f, isVerified = true, category = "Popular"),
     MaulanaItem(3, "Maulana Hassan Ali", "Quran Teacher", "Tafseer Al-Quran", "Chittagong, Bangladesh", 64, 1, 2150, 4.7f, isVerified = false, category = "Popular"),
@@ -71,7 +71,8 @@ private val sampleMaulanas = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaulanaScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onMaulanaClick: (Int) -> Unit = {}
 ) {
     var selectedFilter by remember { mutableStateOf("All") }
     var searchQuery by remember { mutableStateOf("") }
@@ -154,7 +155,9 @@ fun MaulanaScreen(
             items(filteredMaulanas, key = { it.id }) { maulana ->
                 MaulanaProfileCard(
                     maulana = maulana,
-                    modifier = Modifier.padding(horizontal = Spacing.medium)
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.medium)
+                        .clickable { onMaulanaClick(maulana.id) }
                 )
                 Spacer(modifier = Modifier.height(Spacing.medium))
             }
