@@ -44,6 +44,8 @@
     <string name="input_search_events">মাহফিল খুঁজুন…</string>
     <string name="input_enter_name">আপনার নাম লিখুন</string>
     <string name="input_enter_email">আপনার ইমেইল লিখুন</string>
+    <string name="input_email_or_phone_label">ইমেইল বা ফোন নম্বর</string>
+    <string name="input_enter_email_or_phone">ইমেইল বা ফোন নম্বর লিখুন</string>
     <string name="input_enter_password">পাসওয়ার্ড লিখুন</string>
     
     <!-- Events -->

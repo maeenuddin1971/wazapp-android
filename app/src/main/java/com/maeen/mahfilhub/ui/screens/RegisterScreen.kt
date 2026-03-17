@@ -3,7 +3,6 @@ package com.maeen.mahfilhub.ui.screens
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -25,6 +23,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -66,12 +65,9 @@ fun RegisterScreen(
     onNavigateToLogin: () -> Unit = {}
 ) {
     var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
+    var emailOrPhone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
     var agreeTerms by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -155,24 +151,13 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ── Email Field ───────────────────────────────────────────
+            // ── Email or Phone Field ──────────────────────────────────
             RegisterIslamicField(
-                label = "Email Address",
-                value = email,
-                onValueChange = { email = it },
-                placeholder = stringResource(R.string.input_enter_email),
+                label = stringResource(R.string.input_email_or_phone_label),
+                value = emailOrPhone,
+                onValueChange = { emailOrPhone = it },
+                placeholder = stringResource(R.string.input_enter_email_or_phone),
                 icon = Icons.Outlined.Email
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ── Phone Field ───────────────────────────────────────────
-            RegisterIslamicField(
-                label = "Phone Number",
-                value = phone,
-                onValueChange = { phone = it },
-                placeholder = "+880 1XXX XXXXXX",
-                icon = Icons.Outlined.Phone
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -204,42 +189,6 @@ fun RegisterScreen(
                         }
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    colors = registerIslamicColors()
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ── Confirm Password Field ────────────────────────────────
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Confirm Password",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = RegSubtleText,
-                    modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
-                )
-                OutlinedTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    placeholder = { Text("Re-enter password", color = RegMutedText) },
-                    leadingIcon = {
-                        Icon(Icons.Outlined.Lock, null, tint = RegIslamicGold, modifier = Modifier.size(20.dp))
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                            Icon(
-                                imageVector = if (confirmPasswordVisible) Icons.Filled.Info else Icons.Outlined.Lock,
-                                contentDescription = null,
-                                tint = RegMutedText,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    },
-                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
@@ -357,9 +306,9 @@ fun RegisterScreen(
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = RegGlassBackground)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = null,
-                    tint = Color(0xFFDB4437),
+                    painter = painterResource(id = R.drawable.ic_google),
+                    contentDescription = "Google",
+                    tint = Color.Unspecified,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))

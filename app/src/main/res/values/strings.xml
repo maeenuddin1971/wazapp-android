@@ -44,6 +44,8 @@
     <string name="input_search_events">Search for events…</string>
     <string name="input_enter_name">Enter your name</string>
     <string name="input_enter_email">Enter your email</string>
+    <string name="input_email_or_phone_label">Email or Phone Number</string>
+    <string name="input_enter_email_or_phone">Enter email or phone number</string>
     <string name="input_enter_password">Enter password</string>
     
     <!-- Events -->
