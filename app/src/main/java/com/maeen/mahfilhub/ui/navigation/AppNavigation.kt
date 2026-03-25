@@ -1,19 +1,21 @@
 package com.maeen.mahfilhub.ui.navigation
 
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.maeen.mahfilhub.ui.screens.*
+import com.maeen.mahfilhub.util.SessionManager
 import kotlinx.serialization.Serializable
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -53,6 +55,56 @@ fun isDarkScreen(key: Any): Boolean = key is AppScreen.Splash ||
     key is AppScreen.Register
 
 // ══════════════════════════════════════════════════════════════════════════
+// Animation Specs
+// ══════════════════════════════════════════════════════════════════════════
+
+private const val ANIM_DURATION = 350
+private const val FADE_DURATION = 200
+
+/** Forward: new screen slides in from right, old screen stays mostly in place */
+private val slideForwardTransition: ContentTransform =
+    (slideInHorizontally(
+        initialOffsetX = { fullWidth -> fullWidth },
+        animationSpec = tween(ANIM_DURATION)
+    ) + fadeIn(tween(FADE_DURATION)))
+        .togetherWith(
+            slideOutHorizontally(
+                targetOffsetX = { fullWidth -> -fullWidth / 4 },
+                animationSpec = tween(ANIM_DURATION)
+            )
+            // No fadeOut on the old screen — prevents white flash
+        )
+
+/** Pop: previous screen slides in from left, current screen slides out to right */
+private val slidePopTransition: ContentTransform =
+    (slideInHorizontally(
+        initialOffsetX = { fullWidth -> -fullWidth / 4 },
+        animationSpec = tween(ANIM_DURATION)
+    ))
+        .togetherWith(
+            slideOutHorizontally(
+                targetOffsetX = { fullWidth -> fullWidth },
+                animationSpec = tween(ANIM_DURATION)
+            )
+            // No fadeOut — prevents white flash on back navigation
+        )
+
+/** Splash → Onboarding: simple crossfade (no slide) */
+private val fadeTransition: ContentTransform =
+    fadeIn(tween(400)).togetherWith(fadeOut(tween(400)))
+
+/**
+ * Build the metadata map with both forward and pop animation specs.
+ */
+private fun slideMetadata(): Map<String, Any> =
+    NavDisplay.transitionSpec { slideForwardTransition } +
+        NavDisplay.popTransitionSpec { slidePopTransition }
+
+private fun fadeMetadata(): Map<String, Any> =
+    NavDisplay.transitionSpec { fadeTransition } +
+        NavDisplay.popTransitionSpec { fadeTransition }
+
+// ══════════════════════════════════════════════════════════════════════════
 // NavDisplay setup
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -61,6 +113,7 @@ fun AppNavDisplay(
     backStack: SnapshotStateList<Any>,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     NavDisplay(
         backStack = backStack,
         modifier = modifier,
@@ -70,27 +123,48 @@ fun AppNavDisplay(
             }
         },
         entryProvider = entryProvider {
-            entry<AppScreen.Splash> {
+            entry<AppScreen.Splash>(
+                metadata = fadeMetadata()
+            ) {
                 SplashScreen(
                     onTimeout = {
                         backStack.clear()
-                        backStack.add(AppScreen.Onboarding)
+                        when {
+                            SessionManager.isLoggedIn(context) -> {
+                                // Already logged in → skip onboarding & login
+                                backStack.add(AppScreen.Main)
+                            }
+                            SessionManager.isOnboardingDone(context) -> {
+                                // Onboarding done but not logged in
+                                backStack.add(AppScreen.Login)
+                            }
+                            else -> {
+                                // First launch → show onboarding
+                                backStack.add(AppScreen.Onboarding)
+                            }
+                        }
                     }
                 )
             }
 
-            entry<AppScreen.Onboarding> {
+            entry<AppScreen.Onboarding>(
+                metadata = slideMetadata()
+            ) {
                 OnboardingScreen(
                     onFinished = {
+                        SessionManager.setOnboardingDone(context)
                         backStack.clear()
                         backStack.add(AppScreen.Login)
                     }
                 )
             }
 
-            entry<AppScreen.Login> {
+            entry<AppScreen.Login>(
+                metadata = slideMetadata()
+            ) {
                 LoginScreen(
                     onLoginSuccess = {
+                        SessionManager.login(context, name = "Bipul Ahmed", email = "bipul@mahfilhub.com")
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     },
@@ -98,15 +172,19 @@ fun AppNavDisplay(
                         backStack.add(AppScreen.Register)
                     },
                     onGuestMode = {
+                        SessionManager.login(context, name = "Guest User", email = "guest@mahfilhub.com")
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     }
                 )
             }
 
-            entry<AppScreen.Register> {
+            entry<AppScreen.Register>(
+                metadata = slideMetadata()
+            ) {
                 RegisterScreen(
                     onRegisterSuccess = {
+                        SessionManager.login(context, name = "New User", email = "newuser@mahfilhub.com")
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     },
@@ -116,7 +194,9 @@ fun AppNavDisplay(
                 )
             }
 
-            entry<AppScreen.Main> {
+            entry<AppScreen.Main>(
+                metadata = slideMetadata()
+            ) {
                 HomeScreen(
                     onEventClick = { eventId ->
                         backStack.add(AppScreen.EventDetail(eventId))
@@ -127,7 +207,9 @@ fun AppNavDisplay(
                 )
             }
 
-            entry<AppScreen.EventDetail> { key ->
+            entry<AppScreen.EventDetail>(
+                metadata = slideMetadata()
+            ) { key ->
                 EventDetailScreen(
                     eventId = key.eventId,
                     onBack = {
@@ -136,7 +218,9 @@ fun AppNavDisplay(
                 )
             }
 
-            entry<AppScreen.MaulanaDetail> { key ->
+            entry<AppScreen.MaulanaDetail>(
+                metadata = slideMetadata()
+            ) { key ->
                 MaulanaDetailScreen(
                     maulanaId = key.maulanaId,
                     onBack = {

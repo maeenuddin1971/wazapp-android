@@ -100,11 +100,17 @@ fun HomeScreen(
             key = { it }
         ) { page ->
             when (page) {
-                0 -> HomeContent()
+                0 -> HomeContent(
+                    onEventClick = onEventClick,
+                    onMaulanaClick = onMaulanaClick
+                )
                 1 -> EventsScreen(onEventClick = onEventClick)
                 2 -> MaulanaScreen(onMaulanaClick = onMaulanaClick)
                 3 -> ProfileScreen()
-                else -> HomeContent()
+                else -> HomeContent(
+                    onEventClick = onEventClick,
+                    onMaulanaClick = onMaulanaClick
+                )
             }
         }
     }
@@ -115,7 +121,11 @@ fun HomeScreen(
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun HomeContent(modifier: Modifier = Modifier) {
+private fun HomeContent(
+    modifier: Modifier = Modifier,
+    onEventClick: (Int) -> Unit = {},
+    onMaulanaClick: (Int) -> Unit = {}
+) {
     val scrollState = rememberScrollState()
     Column(
         modifier = modifier
@@ -124,8 +134,8 @@ private fun HomeContent(modifier: Modifier = Modifier) {
     ) {
         HomeHeader()
         QuickActionsSection()
-        UpcomingEventsSection()
-        FeaturedMaulanaSection()
+        UpcomingEventsSection(onEventClick = onEventClick)
+        FeaturedMaulanaSection(onMaulanaClick = onMaulanaClick)
         RecentActivitySection()
         Spacer(modifier = Modifier.height(Spacing.medium))
     }
@@ -347,7 +357,7 @@ private fun QuickActionItem(action: QuickAction) {
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun UpcomingEventsSection() {
+private fun UpcomingEventsSection(onEventClick: (Int) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -391,7 +401,8 @@ private fun UpcomingEventsSection() {
                 location = "Dhaka Central Mosque",
                 date = "Mar 14, 2026",
                 time = "After Jummah",
-                isLive = false
+                isLive = false,
+                onClick = { onEventClick(1) }
             )
             EventCard(
                 title = "Tafseer Al-Quran",
@@ -399,7 +410,8 @@ private fun UpcomingEventsSection() {
                 location = "Baitul Mukarram",
                 date = "Mar 15, 2026",
                 time = "After Maghrib",
-                isLive = true
+                isLive = true,
+                onClick = { onEventClick(2) }
             )
             EventCard(
                 title = "Seerah Conference",
@@ -407,7 +419,8 @@ private fun UpcomingEventsSection() {
                 location = "Chittagong Grand Masjid",
                 date = "Mar 18, 2026",
                 time = "10:00 AM",
-                isLive = false
+                isLive = false,
+                onClick = { onEventClick(3) }
             )
         }
     }
@@ -420,9 +433,11 @@ private fun EventCard(
     location: String,
     date: String,
     time: String,
-    isLive: Boolean
+    isLive: Boolean,
+    onClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onClick,
         modifier = Modifier
             .width(280.dp)
             .shadow(
@@ -618,7 +633,7 @@ private fun EventCard(
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun FeaturedMaulanaSection() {
+private fun FeaturedMaulanaSection(onMaulanaClick: (Int) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -651,10 +666,10 @@ private fun FeaturedMaulanaSection() {
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(Spacing.medium)
         ) {
-            MaulanaChip("Maulana Abdul Karim", "120 Events", true)
-            MaulanaChip("Maulana Tariq Jameel", "85 Events", true)
-            MaulanaChip("Maulana Hassan Ali", "64 Events", false)
-            MaulanaChip("Maulana Ibrahim", "42 Events", false)
+            MaulanaChip("Maulana Abdul Karim", "120 Events", true, onClick = { onMaulanaClick(1) })
+            MaulanaChip("Maulana Tariq Jameel", "85 Events", true, onClick = { onMaulanaClick(2) })
+            MaulanaChip("Maulana Hassan Ali", "64 Events", false, onClick = { onMaulanaClick(3) })
+            MaulanaChip("Maulana Ibrahim", "42 Events", false, onClick = { onMaulanaClick(4) })
         }
     }
 }
@@ -663,9 +678,11 @@ private fun FeaturedMaulanaSection() {
 private fun MaulanaChip(
     name: String,
     eventCount: String,
-    isVerified: Boolean
+    isVerified: Boolean,
+    onClick: () -> Unit = {}
 ) {
     Surface(
+        onClick = onClick,
         modifier = Modifier
             .width(160.dp),
         shape = RoundedCornerShape(16.dp),
