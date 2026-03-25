@@ -11,10 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.maeen.mahfilhub.ui.navigation.AppNavHost
-import com.maeen.mahfilhub.ui.navigation.AppRoutes
+import com.maeen.mahfilhub.ui.navigation.AppNavDisplay
+import com.maeen.mahfilhub.ui.navigation.AppScreen
+import com.maeen.mahfilhub.ui.navigation.isDarkScreen
 import com.maeen.mahfilhub.ui.theme.MahfilHubTheme
 import com.maeen.mahfilhub.util.LocaleHelper
 
@@ -39,26 +38,20 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            val navController = rememberNavController()
+            // Nav3: own the back stack as a plain list
+            val backStack = remember { mutableStateListOf<Any>(AppScreen.Splash) }
             val isDarkTheme = isSystemInDarkTheme()
 
-            // Determine if the current screen has a dark background (for status bar icons)
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
-
-            val hasDarkBackground = currentRoute in listOf(
-                AppRoutes.SPLASH,
-                AppRoutes.ONBOARDING,
-                AppRoutes.LOGIN,
-                AppRoutes.REGISTER
-            )
+            // Determine if the current top screen has a dark background
+            val currentKey = backStack.lastOrNull()
+            val hasDarkBackground = currentKey != null && isDarkScreen(currentKey)
 
             MahfilHubTheme(
                 darkTheme = isDarkTheme,
                 darkStatusBarIcons = if (hasDarkBackground) false else !isDarkTheme
             ) {
-                AppNavHost(
-                    navController = navController,
+                AppNavDisplay(
+                    backStack = backStack,
                     modifier = Modifier.fillMaxSize()
                 )
             }

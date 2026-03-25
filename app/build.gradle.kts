@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -51,8 +52,10 @@ dependencies {
     // SplashScreen API
     implementation("androidx.core:core-splashscreen:1.0.1")
     
-    // Navigation Compose
-    implementation(libs.androidx.navigation.compose)
+    // Navigation 3
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.kotlinx.serialization.core)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
