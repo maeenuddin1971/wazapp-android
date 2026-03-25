@@ -2,13 +2,16 @@ package com.maeen.mahfilhub.ui.screens
 
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,17 +27,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
 import com.maeen.mahfilhub.ui.theme.*
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 
 
 
@@ -49,31 +54,58 @@ fun HomeScreen(
     onEventClick: (Int) -> Unit = {},
     onMaulanaClick: (Int) -> Unit = {}
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(initialPage = 0) { 4 }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var backPressedOnce by remember { mutableStateOf(false) }
+
+    // Back press: non-Home tab → go to Home; Home tab → double-press to exit
+    BackHandler(enabled = true) {
+        if (pagerState.currentPage != 0) {
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(0)
+            }
+        } else if (backPressedOnce) {
+            (context as? android.app.Activity)?.finish()
+        } else {
+            backPressedOnce = true
+            Toast.makeText(context, "Tap back again to exit", Toast.LENGTH_SHORT).show()
+            coroutineScope.launch {
+                kotlinx.coroutines.delay(2000)
+                backPressedOnce = false
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
-            HomeBottomNavBar(
-                selectedIndex = selectedTab,
-                onTabSelected = { selectedTab = it }
+            CompactBottomNavBar(
+                selectedIndex = pagerState.currentPage,
+                onTabSelected = { index ->
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                }
             )
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        // Switch between screens based on selected tab
-        when (selectedTab) {
-            0 -> HomeContent(modifier = Modifier.padding(innerPadding))
-            1 -> EventsScreen(
-                modifier = Modifier.padding(innerPadding),
-                onEventClick = onEventClick
-            )
-            2 -> MaulanaScreen(
-                modifier = Modifier.padding(innerPadding),
-                onMaulanaClick = onMaulanaClick
-            )
-            3 -> ProfileScreen(modifier = Modifier.padding(innerPadding))
-            else -> HomeContent(modifier = Modifier.padding(innerPadding))
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            beyondViewportPageCount = 1,
+            key = { it }
+        ) { page ->
+            when (page) {
+                0 -> HomeContent()
+                1 -> EventsScreen(onEventClick = onEventClick)
+                2 -> MaulanaScreen(onMaulanaClick = onMaulanaClick)
+                3 -> ProfileScreen()
+                else -> HomeContent()
+            }
         }
     }
 }
@@ -804,7 +836,7 @@ private fun ActivityItem(
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// Bottom Navigation Bar
+// Compact Bottom Navigation Bar
 // ══════════════════════════════════════════════════════════════════════════
 
 private data class NavItem(
@@ -814,7 +846,7 @@ private data class NavItem(
 )
 
 @Composable
-private fun HomeBottomNavBar(
+private fun CompactBottomNavBar(
     selectedIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {
@@ -825,36 +857,86 @@ private fun HomeBottomNavBar(
         NavItem("Profile", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle)
     )
 
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 8.dp
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 8.dp
     ) {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                selected = selectedIndex == index,
-                onClick = { onTabSelected(index) },
-                icon = {
-                    Icon(
-                        imageVector = if (selectedIndex == index) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = item.label
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (selectedIndex == index) FontWeight.Bold else FontWeight.Normal
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PrimaryTeal,
-                    selectedTextColor = PrimaryTeal,
-                    indicatorColor = PrimaryTeal.copy(alpha = 0.12f),
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .height(56.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEachIndexed { index, item ->
+                CompactNavItem(
+                    item = item,
+                    isSelected = selectedIndex == index,
+                    onClick = { onTabSelected(index) }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompactNavItem(
+    item: NavItem,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val iconColor by animateColorAsState(
+        targetValue = if (isSelected) PrimaryTeal else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(250),
+        label = "navIconColor"
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (isSelected) PrimaryTeal else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(250),
+        label = "navLabelColor"
+    )
+    val indicatorAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 0.12f else 0f,
+        animationSpec = tween(250),
+        label = "navIndicator"
+    )
+
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(PrimaryTeal.copy(alpha = indicatorAlpha))
+                .padding(horizontal = 12.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
+                contentDescription = item.label,
+                tint = iconColor,
+                modifier = Modifier.size(22.dp)
             )
         }
+        Text(
+            text = item.label,
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 10.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = labelColor,
+            maxLines = 1
+        )
     }
 }
 
