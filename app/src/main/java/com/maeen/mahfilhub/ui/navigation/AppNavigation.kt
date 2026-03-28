@@ -43,6 +43,12 @@ sealed interface AppScreen {
 
     @Serializable
     data class MaulanaDetail(val maulanaId: Int) : AppScreen
+
+    @Serializable
+    data object Notifications : AppScreen
+
+    @Serializable
+    data class NotificationDetail(val notificationId: Int) : AppScreen
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -129,19 +135,10 @@ fun AppNavDisplay(
                 SplashScreen(
                     onTimeout = {
                         backStack.clear()
-                        when {
-                            SessionManager.isLoggedIn(context) -> {
-                                // Already logged in → skip onboarding & login
-                                backStack.add(AppScreen.Main)
-                            }
-                            SessionManager.isOnboardingDone(context) -> {
-                                // Onboarding done but not logged in
-                                backStack.add(AppScreen.Login)
-                            }
-                            else -> {
-                                // First launch → show onboarding
-                                backStack.add(AppScreen.Onboarding)
-                            }
+                        if (SessionManager.isLoggedIn(context)) {
+                            backStack.add(AppScreen.Main)
+                        } else {
+                            backStack.add(AppScreen.Onboarding)
                         }
                     }
                 )
@@ -152,7 +149,6 @@ fun AppNavDisplay(
             ) {
                 OnboardingScreen(
                     onFinished = {
-                        SessionManager.setOnboardingDone(context)
                         backStack.clear()
                         backStack.add(AppScreen.Login)
                     }
@@ -203,6 +199,9 @@ fun AppNavDisplay(
                     },
                     onMaulanaClick = { maulanaId ->
                         backStack.add(AppScreen.MaulanaDetail(maulanaId))
+                    },
+                    onNotificationsClick = {
+                        backStack.add(AppScreen.Notifications)
                     }
                 )
             }
@@ -228,6 +227,36 @@ fun AppNavDisplay(
                     },
                     onEventClick = { eventId ->
                         backStack.add(AppScreen.EventDetail(eventId))
+                    }
+                )
+            }
+
+            entry<AppScreen.Notifications>(
+                metadata = slideMetadata()
+            ) {
+                NotificationListScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onNotificationClick = { notificationId ->
+                        backStack.add(AppScreen.NotificationDetail(notificationId))
+                    }
+                )
+            }
+
+            entry<AppScreen.NotificationDetail>(
+                metadata = slideMetadata()
+            ) { key ->
+                NotificationDetailScreen(
+                    notificationId = key.notificationId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onEventClick = { eventId ->
+                        backStack.add(AppScreen.EventDetail(eventId))
+                    },
+                    onMaulanaClick = { maulanaId ->
+                        backStack.add(AppScreen.MaulanaDetail(maulanaId))
                     }
                 )
             }

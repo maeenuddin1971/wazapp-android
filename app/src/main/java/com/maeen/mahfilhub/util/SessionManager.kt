@@ -14,7 +14,6 @@ object SessionManager {
     private const val KEY_IS_LOGGED_IN = "is_logged_in"
     private const val KEY_USER_NAME = "user_name"
     private const val KEY_USER_EMAIL = "user_email"
-    private const val KEY_ONBOARDING_DONE = "onboarding_done"
 
     private fun prefs(context: Context): SharedPreferences =
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -52,14 +51,4 @@ object SessionManager {
     fun getUserEmail(context: Context): String =
         prefs(context).getString(KEY_USER_EMAIL, "") ?: ""
 
-    // ── Onboarding ──────────────────────────────────────────────────────
-
-    fun isOnboardingDone(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_ONBOARDING_DONE, false)
-
-    fun setOnboardingDone(context: Context) {
-        prefs(context).edit()
-            .putBoolean(KEY_ONBOARDING_DONE, true)
-            .apply()
-    }
 }

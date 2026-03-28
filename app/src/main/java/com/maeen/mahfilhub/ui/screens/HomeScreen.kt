@@ -52,7 +52,8 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onEventClick: (Int) -> Unit = {},
-    onMaulanaClick: (Int) -> Unit = {}
+    onMaulanaClick: (Int) -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
     val coroutineScope = rememberCoroutineScope()
@@ -102,14 +103,16 @@ fun HomeScreen(
             when (page) {
                 0 -> HomeContent(
                     onEventClick = onEventClick,
-                    onMaulanaClick = onMaulanaClick
+                    onMaulanaClick = onMaulanaClick,
+                    onNotificationsClick = onNotificationsClick
                 )
                 1 -> EventsScreen(onEventClick = onEventClick)
                 2 -> MaulanaScreen(onMaulanaClick = onMaulanaClick)
-                3 -> ProfileScreen()
+                3 -> ProfileScreen(onNotificationsClick = onNotificationsClick)
                 else -> HomeContent(
                     onEventClick = onEventClick,
-                    onMaulanaClick = onMaulanaClick
+                    onMaulanaClick = onMaulanaClick,
+                    onNotificationsClick = onNotificationsClick
                 )
             }
         }
@@ -124,7 +127,8 @@ fun HomeScreen(
 private fun HomeContent(
     modifier: Modifier = Modifier,
     onEventClick: (Int) -> Unit = {},
-    onMaulanaClick: (Int) -> Unit = {}
+    onMaulanaClick: (Int) -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -132,7 +136,7 @@ private fun HomeContent(
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        HomeHeader()
+        HomeHeader(onNotificationsClick = onNotificationsClick)
         QuickActionsSection()
         UpcomingEventsSection(onEventClick = onEventClick)
         FeaturedMaulanaSection(onMaulanaClick = onMaulanaClick)
@@ -146,7 +150,7 @@ private fun HomeContent(
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun HomeHeader() {
+private fun HomeHeader(onNotificationsClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -198,7 +202,7 @@ private fun HomeHeader() {
 
                 // Notification icon
                 IconButton(
-                    onClick = { },
+                    onClick = onNotificationsClick,
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)

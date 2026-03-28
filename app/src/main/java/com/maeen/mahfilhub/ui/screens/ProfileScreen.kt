@@ -36,7 +36,8 @@ import com.maeen.mahfilhub.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNotificationsClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -71,7 +72,8 @@ fun ProfileScreen(
                         icon = Icons.Outlined.Notifications,
                         title = stringResource(R.string.settings_notifications),
                         subtitle = "Manage notification preferences",
-                        color = AccentOrange
+                        color = AccentOrange,
+                        onClick = onNotificationsClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Outlined.Lock,
@@ -470,7 +472,8 @@ private data class ProfileMenuItem(
     val title: String,
     val subtitle: String,
     val color: Color,
-    val badge: String? = null
+    val badge: String? = null,
+    val onClick: (() -> Unit)? = null
 )
 
 @Composable
@@ -503,7 +506,7 @@ private fun ProfileMenuRow(item: ProfileMenuItem) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { }
+            .clickable { item.onClick?.invoke() }
             .padding(horizontal = Spacing.medium, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
