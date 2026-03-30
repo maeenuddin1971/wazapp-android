@@ -4,10 +4,9 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -20,12 +19,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
 import com.maeen.mahfilhub.ui.theme.*
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -37,7 +42,14 @@ internal fun findEventById(eventId: Int): EventItem? {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// Event Detail Screen
+// Constants
+// ══════════════════════════════════════════════════════════════════════════
+
+private val EventExpandedHeaderHeight = 310.dp
+private val EventToolbarHeight = 56.dp
+
+// ══════════════════════════════════════════════════════════════════════════
+// Event Detail Screen — Collapsing Header
 // ══════════════════════════════════════════════════════════════════════════
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +62,6 @@ fun EventDetailScreen(
     val event = remember { findEventById(eventId) }
 
     if (event == null) {
-        // Fallback
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Event not found", style = MaterialTheme.typography.bodyLarge)
         }
@@ -59,39 +70,219 @@ fun EventDetailScreen(
 
     var isSaved by remember { mutableStateOf(false) }
 
+    val headerGradient = if (event.isLive)
+        listOf(ErrorRed, ErrorRed.copy(alpha = 0.8f))
+    else
+        listOf(PrimaryTeal, PrimaryTealDark)
+
+    // ── Collapsing header state ────────────────────────────────────────
+    val density = LocalDensity.current
+    val statusBarPx = WindowInsets.statusBars.getTop(density).toFloat()
+    val toolbarPx = with(density) { EventToolbarHeight.toPx() }
+    val collapsedPx = statusBarPx + toolbarPx
+    val expandedPx = with(density) { EventExpandedHeaderHeight.toPx() }
+    val maxOffsetPx = expandedPx - collapsedPx
+
+    var headerOffset by remember { mutableFloatStateOf(0f) }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                val newOffset = (headerOffset - delta).coerceIn(0f, maxOffsetPx)
+                val consumed = headerOffset - newOffset
+                headerOffset = newOffset
+                return Offset(0f, consumed)
+            }
+        }
+    }
+
+    val collapseProgress = (headerOffset / maxOffsetPx).coerceIn(0f, 1f)
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Scrollable content ─────────────────────────────────────────
-        Column(
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .nestedScroll(nestedScrollConnection)
         ) {
-            // ── Hero Header ────────────────────────────────────────────
+            // ── Scrollable content (below header) ─────────────────────
+            val headerHeightDp = with(density) { (expandedPx - headerOffset).toDp() }
+
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    top = headerHeightDp + 8.dp,
+                    bottom = Spacing.large,
+                    start = Spacing.medium,
+                    end = Spacing.medium
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Date & Time
+                item {
+                    EventInfoCard(
+                        icon = Icons.Outlined.DateRange,
+                        iconColor = PrimaryTeal,
+                        title = "Date & Time",
+                        primaryText = event.date,
+                        secondaryText = event.time
+                    )
+                }
+
+                // Location
+                item {
+                    EventInfoCard(
+                        icon = Icons.Outlined.LocationOn,
+                        iconColor = AccentOrange,
+                        title = "Location",
+                        primaryText = event.location,
+                        secondaryText = "Tap for directions"
+                    )
+                }
+
+                // Scholar
+                item {
+                    EventInfoCard(
+                        icon = Icons.Outlined.Person,
+                        iconColor = VerifiedBadge,
+                        title = "Scholar",
+                        primaryText = event.maulana,
+                        secondaryText = "View profile"
+                    )
+                }
+
+                // About Section
+                item {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(
+                                text = "About This Event",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "Join us for an enlightening session of ${event.title} led by ${event.maulana}. " +
+                                        "This event brings together the Muslim community for spiritual growth, " +
+                                        "knowledge sharing, and strengthening of faith. Everyone is welcome to attend " +
+                                        "and benefit from this blessed gathering.\n\n" +
+                                        "The program will include recitation of the Holy Quran, " +
+                                        "an insightful lecture, and a Q&A session. " +
+                                        "Light refreshments will be provided after the event.",
+                                fontSize = 14.sp,
+                                lineHeight = 22.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                // Quick Stats
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        EventQuickStat(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Filled.Person,
+                            value = "${event.attendees}",
+                            label = "Attending",
+                            color = PrimaryTeal
+                        )
+                        EventQuickStat(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Filled.Star,
+                            value = if (event.isFeatured) "Featured" else "Regular",
+                            label = "Status",
+                            color = AccentOrange
+                        )
+                        EventQuickStat(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Filled.CheckCircle,
+                            value = event.category,
+                            label = "Category",
+                            color = SecondaryGreen
+                        )
+                    }
+                }
+
+                // Guidelines
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = PrimaryTeal.copy(alpha = 0.08f)
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = null,
+                                    tint = PrimaryTeal,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Event Guidelines",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PrimaryTeal
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            listOf(
+                                "Please arrive 15 minutes early",
+                                "Maintain silence during the lecture",
+                                "Bring your own prayer mat if possible",
+                                "Photography is not allowed during the program"
+                            ).forEach { guideline ->
+                                Row(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.Top
+                                ) {
+                                    Text("•", fontSize = 14.sp, color = PrimaryTeal, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = guideline,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        lineHeight = 18.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Collapsing Header ─────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(280.dp)
+                    .height(headerHeightDp)
+                    .background(Brush.verticalGradient(colors = headerGradient))
             ) {
-                // Gradient background
-                Box(
+                // Decorative circles (fade out)
+                Canvas(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = if (event.isLive)
-                                    listOf(ErrorRed, ErrorRed.copy(alpha = 0.8f))
-                                else
-                                    listOf(PrimaryTeal, PrimaryTealDark)
-                            )
-                        )
-                )
-
-                // Decorative circles
-                Canvas(modifier = Modifier.fillMaxSize()) {
+                        .matchParentSize()
+                        .graphicsLayer { alpha = 1f - collapseProgress }
+                ) {
                     drawCircle(
                         color = Color.White.copy(alpha = 0.06f),
                         radius = 160f,
@@ -109,66 +300,101 @@ fun EventDetailScreen(
                     )
                 }
 
-                // Content overlay
+                // ── Back button (always visible) ──────────────────────
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(start = Spacing.small, top = 8.dp)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = lerp(0.15f, 0.0f, collapseProgress)))
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // ── Save & Share buttons (always visible) ─────────────
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .statusBarsPadding()
+                        .padding(end = Spacing.small, top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = { isSaved = !isSaved },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = lerp(0.15f, 0.0f, collapseProgress)))
+                    ) {
+                        Icon(
+                            imageVector = if (isSaved) Icons.Filled.Favorite
+                            else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Save",
+                            tint = if (isSaved) ErrorRed else Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = { },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = lerp(0.15f, 0.0f, collapseProgress)))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Share,
+                            contentDescription = "Share",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                // ── Animated Event Title ──────────────────────────────
+                val titleFontSize = lerp(24f, 18f, collapseProgress).sp
+                val titleStartPadding = lerp(16f, 56f, collapseProgress).dp
+                val titleEndPadding = lerp(16f, 16f, collapseProgress).dp
+                val titleTopPadding = with(density) {
+                    val expandedTop = statusBarPx + with(density) { 190.dp.toPx() }
+                    val collapsedTop = statusBarPx + with(density) { 18.dp.toPx() }
+                    lerp(expandedTop, collapsedTop, collapseProgress).toDp()
+                }
+
+                Text(
+                    text = event.title,
+                    fontSize = titleFontSize,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = if (collapseProgress > 0.5f) 1 else 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(
+                            start = titleStartPadding,
+                            top = titleTopPadding,
+                            end = titleEndPadding
+                        )
+                )
+
+                // ── Expanded-only content (badges, attendees) ─────────
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                        .statusBarsPadding()
+                        .fillMaxWidth()
+                        .graphicsLayer { alpha = (1f - collapseProgress * 2.5f).coerceIn(0f, 1f) }
+                        .padding(start = Spacing.medium, end = Spacing.medium)
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Top bar: Back + Share/Save
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = onBack,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = Color.White.copy(alpha = 0.15f)
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = Color.White
-                            )
-                        }
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            IconButton(
-                                onClick = { isSaved = !isSaved },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = Color.White.copy(alpha = 0.15f)
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = if (isSaved) Icons.Filled.Favorite
-                                    else Icons.Outlined.FavoriteBorder,
-                                    contentDescription = "Save",
-                                    tint = if (isSaved) ErrorRed else Color.White
-                                )
-                            }
-                            IconButton(
-                                onClick = { },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = Color.White.copy(alpha = 0.15f)
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Share,
-                                    contentDescription = "Share",
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    // Badges
+                    // Badges — positioned below back button
+                    Spacer(
+                        modifier = Modifier
+                            .statusBarsPadding()
+                            .height(56.dp + Spacing.large)
+                    )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (event.isLive) {
                             EventDetailBadge(
@@ -185,211 +411,33 @@ fun EventDetailScreen(
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Title
-                    Text(
-                        text = event.title,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Attendees
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.8f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "${event.attendees} attending",
-                            fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
                 }
-            }
 
-            // ── Info Cards ─────────────────────────────────────────────
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Date & Time
-                EventInfoCard(
-                    icon = Icons.Outlined.DateRange,
-                    iconColor = PrimaryTeal,
-                    title = "Date & Time",
-                    primaryText = event.date,
-                    secondaryText = event.time
-                )
-
-                // Location
-                EventInfoCard(
-                    icon = Icons.Outlined.LocationOn,
-                    iconColor = AccentOrange,
-                    title = "Location",
-                    primaryText = event.location,
-                    secondaryText = "Tap for directions"
-                )
-
-                // Scholar
-                EventInfoCard(
-                    icon = Icons.Outlined.Person,
-                    iconColor = VerifiedBadge,
-                    title = "Scholar",
-                    primaryText = event.maulana,
-                    secondaryText = "View profile"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── About Section ──────────────────────────────────────────
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "About This Event",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                // ── Attendees row (bottom of expanded header) ─────────
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = Spacing.medium, bottom = Spacing.medium)
+                        .graphicsLayer { alpha = (1f - collapseProgress * 2.5f).coerceIn(0f, 1f) },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(16.dp)
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Join us for an enlightening session of ${event.title} led by ${event.maulana}. " +
-                                "This event brings together the Muslim community for spiritual growth, " +
-                                "knowledge sharing, and strengthening of faith. Everyone is welcome to attend " +
-                                "and benefit from this blessed gathering.\n\n" +
-                                "The program will include recitation of the Holy Quran, " +
-                                "an insightful lecture, and a Q&A session. " +
-                                "Light refreshments will be provided after the event.",
+                        text = "${event.attendees} attending",
                         fontSize = 14.sp,
-                        lineHeight = 22.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.White.copy(alpha = 0.8f)
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Quick Stats ────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                EventQuickStat(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Filled.Person,
-                    value = "${event.attendees}",
-                    label = "Attending",
-                    color = PrimaryTeal
-                )
-                EventQuickStat(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Filled.Star,
-                    value = if (event.isFeatured) "Featured" else "Regular",
-                    label = "Status",
-                    color = AccentOrange
-                )
-                EventQuickStat(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Filled.CheckCircle,
-                    value = event.category,
-                    label = "Category",
-                    color = SecondaryGreen
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Guidelines ─────────────────────────────────────────────
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = PrimaryTeal.copy(alpha = 0.08f)
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = null,
-                            tint = PrimaryTeal,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Event Guidelines",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryTeal
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    val guidelines = listOf(
-                        "Please arrive 15 minutes early",
-                        "Maintain silence during the lecture",
-                        "Bring your own prayer mat if possible",
-                        "Photography is not allowed during the program"
-                    )
-
-                    guidelines.forEach { guideline ->
-                        Row(
-                            modifier = Modifier.padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            Text(
-                                text = "•",
-                                fontSize = 14.sp,
-                                color = PrimaryTeal,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = guideline,
-                                fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                lineHeight = 18.sp
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(100.dp))
         }
 
-        // ── Bottom Action Bar ──────────────────────────────────────────
+        // ── Bottom Action Bar (always visible) ────────────────────────
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shadowElevation = 8.dp,
@@ -402,7 +450,6 @@ fun EventDetailScreen(
                     .navigationBarsPadding(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Remind Me
                 OutlinedButton(
                     onClick = { },
                     modifier = Modifier
@@ -417,13 +464,9 @@ fun EventDetailScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Remind Me",
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Text(text = "Remind Me", fontWeight = FontWeight.SemiBold)
                 }
 
-                // Attend
                 Button(
                     onClick = { },
                     modifier = Modifier
@@ -442,10 +485,7 @@ fun EventDetailScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Attend",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = "Attend", fontWeight = FontWeight.Bold)
                 }
             }
         }
