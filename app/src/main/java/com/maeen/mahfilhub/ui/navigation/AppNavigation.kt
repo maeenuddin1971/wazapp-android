@@ -202,6 +202,11 @@ fun AppNavDisplay(
                     },
                     onNotificationsClick = {
                         backStack.add(AppScreen.Notifications)
+                    },
+                    onLogoutClick = {
+                        SessionManager.logout(context)
+                        backStack.clear()
+                        backStack.add(AppScreen.Onboarding)
                     }
                 )
             }

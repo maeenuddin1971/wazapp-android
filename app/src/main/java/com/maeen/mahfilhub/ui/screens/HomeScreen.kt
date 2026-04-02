@@ -53,7 +53,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onEventClick: (Int) -> Unit = {},
     onMaulanaClick: (Int) -> Unit = {},
-    onNotificationsClick: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
     val coroutineScope = rememberCoroutineScope()
@@ -108,7 +109,10 @@ fun HomeScreen(
                 )
                 1 -> EventsScreen(onEventClick = onEventClick)
                 2 -> MaulanaScreen(onMaulanaClick = onMaulanaClick)
-                3 -> ProfileScreen(onNotificationsClick = onNotificationsClick)
+                3 -> ProfileScreen(
+                    onNotificationsClick = onNotificationsClick,
+                    onLogoutClick = onLogoutClick
+                )
                 else -> HomeContent(
                     onEventClick = onEventClick,
                     onMaulanaClick = onMaulanaClick,

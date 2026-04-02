@@ -37,7 +37,8 @@ import com.maeen.mahfilhub.ui.theme.*
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    onNotificationsClick: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -183,7 +184,7 @@ fun ProfileScreen(
 
         // ── Logout Button ────────────────────────────────────────────
         item {
-            LogoutButton()
+            LogoutButton(onLogoutClick = onLogoutClick)
         }
 
         // ── App Version ──────────────────────────────────────────────
@@ -574,9 +575,51 @@ private fun ProfileMenuRow(item: ProfileMenuItem) {
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun LogoutButton() {
+private fun LogoutButton(onLogoutClick: () -> Unit = {}) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.ExitToApp,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            title = {
+                Text(
+                    text = "Logout",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text("Are you sure you want to logout? You'll need to sign in again to access your account.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        onLogoutClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Logout")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     OutlinedButton(
-        onClick = { },
+        onClick = { showDialog = true },
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.medium, vertical = Spacing.medium)
