@@ -81,6 +81,7 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             CompactBottomNavBar(
                 selectedIndex = pagerState.currentPage,

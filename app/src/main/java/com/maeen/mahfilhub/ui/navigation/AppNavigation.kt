@@ -58,7 +58,12 @@ sealed interface AppScreen {
 fun isDarkScreen(key: Any): Boolean = key is AppScreen.Splash ||
     key is AppScreen.Onboarding ||
     key is AppScreen.Login ||
-    key is AppScreen.Register
+    key is AppScreen.Register ||
+    key is AppScreen.Main ||
+    key is AppScreen.EventDetail ||
+    key is AppScreen.MaulanaDetail ||
+    key is AppScreen.Notifications ||
+    key is AppScreen.NotificationDetail
 
 // ══════════════════════════════════════════════════════════════════════════
 // Animation Specs
