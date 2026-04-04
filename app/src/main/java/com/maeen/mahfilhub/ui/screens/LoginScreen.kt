@@ -39,8 +39,10 @@ import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
 import com.maeen.mahfilhub.ui.theme.*
 import com.maeen.mahfilhub.ui.viewmodel.LoginViewModel
+import com.maeen.mahfilhub.ui.viewmodel.LoginUiState
 import com.maeen.mahfilhub.util.SessionManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.PI
 import kotlin.math.cos
@@ -50,20 +52,6 @@ import kotlin.math.sin
 // Login Screen — Islamic Premium Design
 // ══════════════════════════════════════════════════════════════════════════
 
-// Dark Islamic palette
-private val IslamicDark1 = Color(0xFF081C15)
-private val IslamicDark2 = Color(0xFF0B3D2E)
-private val IslamicDark3 = Color(0xFF052E22)
-private val IslamicGold = Color(0xFFD4A953)
-private val IslamicGoldLight = Color(0xFFE8C975)
-private val IslamicGoldMuted = Color(0x40D4A953)
-private val GlassBorder = Color(0x28FFFFFF)
-private val GlassBackground = Color(0x15FFFFFF)
-private val InputBackground = Color(0x1CFFFFFF)
-private val InputBorder = Color(0x30FFFFFF)
-private val InputBorderFocused = Color(0xFF4DB6AC)
-private val SubtleText = Color(0x99FFFFFF)
-private val MutedText = Color(0x55FFFFFF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +67,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val uiState by viewModel.uiState.collectAsState()
 
     // Navigate on successful login
@@ -99,19 +88,70 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
-            snackbarHostState.showSnackbar(it)
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
             viewModel.clearError()
         }
     }
 
+    // Show success via Snackbar
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearSuccess()
+        }
+    }
+
+    // Clear field errors when user starts typing
+    LaunchedEffect(email) {
+        if (uiState.emailError != null) viewModel.clearFieldErrors()
+    }
+    LaunchedEffect(password) {
+        if (uiState.passwordError != null) viewModel.clearFieldErrors()
+    }
+
+    LoginScreenContent(
+        modifier = modifier,
+        email = email,
+        password = password,
+        passwordVisible = passwordVisible,
+        uiState = uiState,
+        snackbarHostState = snackbarHostState,
+        onEmailChange = { email = it },
+        onPasswordChange = { password = it },
+        onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
+        onLoginClick = {
+            keyboardController?.hide()
+            viewModel.login(email, password)
+        },
+        onNavigateToRegister = onNavigateToRegister,
+        onGuestMode = onGuestMode
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LoginScreenContent(
+    modifier: Modifier = Modifier,
+    email: String = "",
+    password: String = "",
+    passwordVisible: Boolean = false,
+    uiState: LoginUiState = LoginUiState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onEmailChange: (String) -> Unit = {},
+    onPasswordChange: (String) -> Unit = {},
+    onPasswordVisibilityToggle: () -> Unit = {},
+    onLoginClick: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
+    onGuestMode: () -> Unit = {}
+) {
+
     Box(modifier = modifier.fillMaxSize()) {
-        // Snackbar host for error messages
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .statusBarsPadding()
-        )
 
         // ── Gradient background ───────────────────────────────────────
         Box(
@@ -186,10 +226,21 @@ fun LoginScreen(
             IslamicInputField(
                 label = "Email Address",
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = onEmailChange,
                 placeholder = stringResource(R.string.input_enter_email),
-                icon = Icons.Outlined.Email
+                icon = Icons.Outlined.Email,
+                isError = uiState.emailError != null
             )
+            if (uiState.emailError != null) {
+                Text(
+                    text = uiState.emailError!!,
+                    color = FieldErrorRed,
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -204,7 +255,7 @@ fun LoginScreen(
                 )
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = onPasswordChange,
                     placeholder = {
                         Text(stringResource(R.string.input_enter_password), color = MutedText)
                     },
@@ -217,7 +268,7 @@ fun LoginScreen(
                         )
                     },
                     trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        IconButton(onClick = onPasswordVisibilityToggle) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Filled.Info else Icons.Outlined.Lock,
                                 contentDescription = if (passwordVisible)
@@ -232,9 +283,20 @@ fun LoginScreen(
                         VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    isError = uiState.passwordError != null,
                     shape = RoundedCornerShape(14.dp),
                     colors = islamicFieldColors()
                 )
+                if (uiState.passwordError != null) {
+                    Text(
+                        text = uiState.passwordError!!,
+                        color = FieldErrorRed,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp, top = 4.dp)
+                    )
+                }
             }
 
             // Forgot Password
@@ -257,7 +319,7 @@ fun LoginScreen(
 
             // ── Login Button ──────────────────────────────────────────
             Button(
-                onClick = { viewModel.login(email, password) },
+                onClick = onLoginClick,
                 enabled = !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -384,7 +446,7 @@ fun LoginScreen(
 
             // ── Bottom: Register link ─────────────────────────────────
             Row(
-                modifier = Modifier.padding(bottom = 24.dp),
+                modifier = Modifier.padding(bottom = 24.dp).clickable { onNavigateToRegister() }.padding( all = 8.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -398,10 +460,18 @@ fun LoginScreen(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = IslamicGoldLight,
-                    modifier = Modifier.clickable { onNavigateToRegister() }
+                    //modifier = Modifier.clickable { onNavigateToRegister() }
                 )
             }
         }
+
+        // Snackbar host – rendered on top of content, at the bottom
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+        )
     }
 }
 
@@ -569,7 +639,8 @@ internal fun IslamicInputField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isError: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -593,6 +664,7 @@ internal fun IslamicInputField(
             },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            isError = isError,
             shape = RoundedCornerShape(14.dp),
             colors = islamicFieldColors()
         )
@@ -604,7 +676,7 @@ internal fun islamicFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = Color.White,
     unfocusedTextColor = Color.White,
     cursorColor = IslamicGoldLight,
-    focusedBorderColor = InputBorderFocused,
+    focusedBorderColor = PrimaryTealLight,
     unfocusedBorderColor = InputBorder,
     focusedContainerColor = InputBackground,
     unfocusedContainerColor = InputBackground,
@@ -620,7 +692,7 @@ internal fun islamicFieldColors() = OutlinedTextFieldDefaults.colors(
 @Composable
 private fun LoginScreenPreview() {
     MahfilHubTheme {
-        LoginScreen()
+        LoginScreenContent()
     }
 }
 
@@ -628,6 +700,6 @@ private fun LoginScreenPreview() {
 @Composable
 private fun LoginScreenDarkPreview() {
     MahfilHubTheme(darkTheme = true) {
-        LoginScreen()
+        LoginScreenContent()
     }
 }

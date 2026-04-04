@@ -42,20 +42,6 @@ import kotlin.math.sin
 // Register Screen — Islamic Premium Design
 // ══════════════════════════════════════════════════════════════════════════
 
-// Islamic palette (shared constants imported from LoginScreen via internal)
-private val RegIslamicDark1 = Color(0xFF081C15)
-private val RegIslamicDark2 = Color(0xFF0B3D2E)
-private val RegIslamicDark3 = Color(0xFF052E22)
-private val RegIslamicGold = Color(0xFFD4A953)
-private val RegIslamicGoldLight = Color(0xFFE8C975)
-private val RegIslamicGoldMuted = Color(0x40D4A953)
-private val RegGlassBorder = Color(0x28FFFFFF)
-private val RegGlassBackground = Color(0x15FFFFFF)
-private val RegInputBackground = Color(0x1CFFFFFF)
-private val RegInputBorder = Color(0x30FFFFFF)
-private val RegInputBorderFocused = Color(0xFF4DB6AC)
-private val RegSubtleText = Color(0x99FFFFFF)
-private val RegMutedText = Color(0x55FFFFFF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +64,7 @@ fun RegisterScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(RegIslamicDark1, RegIslamicDark2, RegIslamicDark3)
+                        colors = listOf(IslamicDark1, IslamicDark2, IslamicDark3)
                     )
                 )
         )
@@ -115,7 +101,7 @@ fun RegisterScreen(
             Text(
                 text = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
                 fontSize = 17.sp,
-                color = RegIslamicGold,
+                color = IslamicGold,
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center
             )
@@ -134,7 +120,7 @@ fun RegisterScreen(
             Text(
                 text = "Create your account to explore Islamic events",
                 fontSize = 13.sp,
-                color = RegSubtleText,
+                color = SubtleText,
                 textAlign = TextAlign.Center
             )
 
@@ -168,22 +154,22 @@ fun RegisterScreen(
                     text = "Password",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = RegSubtleText,
+                    color = SubtleText,
                     modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
                 )
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    placeholder = { Text(stringResource(R.string.input_enter_password), color = RegMutedText) },
+                    placeholder = { Text(stringResource(R.string.input_enter_password), color = MutedText) },
                     leadingIcon = {
-                        Icon(Icons.Outlined.Lock, null, tint = RegIslamicGold, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Outlined.Lock, null, tint = IslamicGold, modifier = Modifier.size(20.dp))
                     },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Filled.Info else Icons.Outlined.Lock,
                                 contentDescription = null,
-                                tint = RegMutedText,
+                                tint = MutedText,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -208,14 +194,14 @@ fun RegisterScreen(
                     onCheckedChange = { agreeTerms = it },
                     colors = CheckboxDefaults.colors(
                         checkedColor = PrimaryTealLight,
-                        uncheckedColor = RegMutedText,
+                        uncheckedColor = MutedText,
                         checkmarkColor = Color.White
                     )
                 )
                 Text(
                     text = "I agree to the Terms of Service and Privacy Policy",
                     fontSize = 12.sp,
-                    color = RegSubtleText,
+                    color = SubtleText,
                     lineHeight = 16.sp,
                     modifier = Modifier.clickable { agreeTerms = !agreeTerms }
                 )
@@ -277,7 +263,7 @@ fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = RegIslamicGoldMuted)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = IslamicGoldMuted)
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 14.dp)
@@ -285,10 +271,10 @@ fun RegisterScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
-                        drawIslamicStar(center, 14f, RegIslamicGold.copy(alpha = 0.5f))
+                        drawIslamicStar(center, 14f, IslamicGold.copy(alpha = 0.5f))
                     }
                 }
-                HorizontalDivider(modifier = Modifier.weight(1f), color = RegIslamicGoldMuted)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = IslamicGoldMuted)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -301,9 +287,9 @@ fun RegisterScreen(
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                    brush = Brush.linearGradient(listOf(RegGlassBorder, RegGlassBorder))
+                    brush = Brush.linearGradient(listOf(GlassBorder, GlassBorder))
                 ),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = RegGlassBackground)
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = GlassBackground)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_google),
@@ -324,21 +310,21 @@ fun RegisterScreen(
 
             // ── Bottom: Login link ────────────────────────────────────
             Row(
-                modifier = Modifier.padding(bottom = 24.dp),
+                modifier = Modifier.padding(bottom = 24.dp)
+                    .clickable{ onNavigateToLogin() }.padding( all = 8.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.auth_have_account) + " ",
                     fontSize = 14.sp,
-                    color = RegSubtleText
+                    color = SubtleText
                 )
                 Text(
                     text = stringResource(R.string.auth_login),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = RegIslamicGoldLight,
-                    modifier = Modifier.clickable { onNavigateToLogin() }
+                    color = IslamicGoldLight
                 )
             }
         }
@@ -362,18 +348,18 @@ private fun RegisterIslamicField(
             text = label,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = RegSubtleText,
+            color = SubtleText,
             modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
         )
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = RegMutedText) },
+            placeholder = { Text(placeholder, color = MutedText) },
             leadingIcon = {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = RegIslamicGold,
+                    tint = IslamicGold,
                     modifier = Modifier.size(20.dp)
                 )
             },
@@ -389,13 +375,13 @@ private fun RegisterIslamicField(
 private fun registerIslamicColors() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = Color.White,
     unfocusedTextColor = Color.White,
-    cursorColor = RegIslamicGoldLight,
-    focusedBorderColor = RegInputBorderFocused,
-    unfocusedBorderColor = RegInputBorder,
-    focusedContainerColor = RegInputBackground,
-    unfocusedContainerColor = RegInputBackground,
-    focusedLeadingIconColor = RegIslamicGold,
-    unfocusedLeadingIconColor = RegIslamicGold
+    cursorColor = IslamicGoldLight,
+    focusedBorderColor = PrimaryTealLight,
+    unfocusedBorderColor = InputBorder,
+    focusedContainerColor = InputBackground,
+    unfocusedContainerColor = InputBackground,
+    focusedLeadingIconColor = IslamicGold,
+    unfocusedLeadingIconColor = IslamicGold
 )
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -408,7 +394,7 @@ private fun DrawScope.drawIslamicBackground() {
 
     drawCircle(
         brush = Brush.radialGradient(
-            colors = listOf(RegIslamicGold.copy(alpha = 0.07f), Color.Transparent),
+            colors = listOf(IslamicGold.copy(alpha = 0.07f), Color.Transparent),
             center = Offset(w * 0.85f, h * 0.06f), radius = 280f
         ), radius = 280f, center = Offset(w * 0.85f, h * 0.06f)
     )
@@ -420,7 +406,7 @@ private fun DrawScope.drawIslamicBackground() {
     )
     drawCircle(
         brush = Brush.radialGradient(
-            colors = listOf(RegIslamicGold.copy(alpha = 0.05f), Color.Transparent),
+            colors = listOf(IslamicGold.copy(alpha = 0.05f), Color.Transparent),
             center = Offset(w * 0.6f, h * 0.9f), radius = 200f
         ), radius = 200f, center = Offset(w * 0.6f, h * 0.9f)
     )
@@ -445,9 +431,9 @@ private fun DrawScope.drawIslamicBackground() {
         lineTo(w * 0.82f, mosqueY + 10f); lineTo(w * 0.82f, h); lineTo(w * 0.78f, h); close()
     }
     drawPath(minaretRight, mosqueColor)
-    drawCircle(RegIslamicGold.copy(alpha = 0.06f), 6f, Offset(w * 0.5f, mosqueY - 85f))
+    drawCircle(IslamicGold.copy(alpha = 0.06f), 6f, Offset(w * 0.5f, mosqueY - 85f))
 
-    val patternColor = RegIslamicGold.copy(alpha = 0.04f)
+    val patternColor = IslamicGold.copy(alpha = 0.04f)
     for (i in 0..2) {
         drawArc(patternColor, 0f, 90f, false, Offset(-30f + i * 20f, -30f + i * 20f), Size(80f - i * 20f, 80f - i * 20f), style = Stroke(1f))
     }
@@ -460,11 +446,11 @@ private fun DrawScope.drawCrescentMoonAndStar() {
     val cx = size.width / 2f
     val cy = size.height / 2f
     val outerR = size.width * 0.38f
-    drawCircle(color = RegIslamicGold, radius = outerR, center = Offset(cx, cy), style = Fill)
-    drawCircle(color = RegIslamicDark1, radius = outerR * 0.78f, center = Offset(cx + outerR * 0.35f, cy - outerR * 0.1f), style = Fill)
+    drawCircle(color = IslamicGold, radius = outerR, center = Offset(cx, cy), style = Fill)
+    drawCircle(color = IslamicDark1, radius = outerR * 0.78f, center = Offset(cx + outerR * 0.35f, cy - outerR * 0.1f), style = Fill)
     val starCx = cx + outerR * 0.15f
     val starCy = cy - outerR * 0.05f
-    drawIslamicStar(Offset(starCx, starCy), outerR * 0.2f, RegIslamicGold)
+    drawIslamicStar(Offset(starCx, starCy), outerR * 0.2f, IslamicGold)
 }
 
 private fun DrawScope.drawIslamicStar(center: Offset, radius: Float, color: Color) {

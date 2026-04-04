@@ -47,3 +47,23 @@ val InfoBlue = Color(0xFF2196F3)
 
 // Verified Badge
 val VerifiedBadge = Color(0xFF1976D2)
+
+// ── Islamic / Auth Screen Colors ──────────────────────────────────────
+val IslamicDark1 = Color(0xFF081C15)
+val IslamicDark2 = Color(0xFF0B3D2E)
+val IslamicDark3 = Color(0xFF052E22)
+
+val IslamicGold = Color(0xFFD4A953)
+val IslamicGoldLight = Color(0xFFE8C975)
+val IslamicGoldMuted = Color(0x40D4A953)
+
+val GlassBorder = Color(0x28FFFFFF)
+val GlassBackground = Color(0x15FFFFFF)
+
+val InputBackground = Color(0x1CFFFFFF)
+val InputBorder = Color(0x30FFFFFF)
+
+val SubtleText = Color(0x99FFFFFF)
+val MutedText = Color(0x55FFFFFF)
+
+val FieldErrorRed = Color(0xFFFF6B6B)
