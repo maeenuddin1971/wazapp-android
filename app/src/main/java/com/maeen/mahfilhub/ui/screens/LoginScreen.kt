@@ -38,6 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
 import com.maeen.mahfilhub.ui.theme.*
+import com.maeen.mahfilhub.ui.viewmodel.LoginViewModel
+import com.maeen.mahfilhub.util.SessionManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -65,6 +69,7 @@ private val MutedText = Color(0x55FFFFFF)
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = viewModel(),
     onLoginSuccess: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
     onGuestMode: () -> Unit = {}
@@ -72,9 +77,42 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Navigate on successful login
+    LaunchedEffect(uiState.loginResponse) {
+        uiState.loginResponse?.let { response ->
+            SessionManager.login(
+                context = context,
+                token = response.token,
+                role = response.role,
+                email = email
+            )
+            onLoginSuccess()
+            viewModel.resetState()
+        }
+    }
+
+    // Show error via Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearError()
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
+        // Snackbar host for error messages
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+        )
+
         // ── Gradient background ───────────────────────────────────────
         Box(
             modifier = Modifier
@@ -219,7 +257,8 @@ fun LoginScreen(
 
             // ── Login Button ──────────────────────────────────────────
             Button(
-                onClick = { onLoginSuccess() },
+                onClick = { viewModel.login(email, password) },
+                enabled = !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
@@ -241,7 +280,7 @@ fun LoginScreen(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (isLoading) {
+                    if (uiState.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(22.dp),
                             color = Color.White,

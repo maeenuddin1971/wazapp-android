@@ -165,7 +165,6 @@ fun AppNavDisplay(
             ) {
                 LoginScreen(
                     onLoginSuccess = {
-                        SessionManager.login(context, name = "Bipul Ahmed", email = "bipul@mahfilhub.com")
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     },
@@ -173,7 +172,7 @@ fun AppNavDisplay(
                         backStack.add(AppScreen.Register)
                     },
                     onGuestMode = {
-                        SessionManager.login(context, name = "Guest User", email = "guest@mahfilhub.com")
+                        SessionManager.loginAsGuest(context)
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     }
@@ -185,7 +184,7 @@ fun AppNavDisplay(
             ) {
                 RegisterScreen(
                     onRegisterSuccess = {
-                        SessionManager.login(context, name = "New User", email = "newuser@mahfilhub.com")
+                        SessionManager.login(context, token = "", role = "ROLE_USER", email = "newuser@mahfilhub.com")
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     },
