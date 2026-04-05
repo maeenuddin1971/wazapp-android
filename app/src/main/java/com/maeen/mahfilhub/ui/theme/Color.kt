@@ -63,7 +63,7 @@ val GlassBackground = Color(0x15FFFFFF)
 val InputBackground = Color(0x1CFFFFFF)
 val InputBorder = Color(0x30FFFFFF)
 
-val SubtleText = Color(0x99FFFFFF)
-val MutedText = Color(0x55FFFFFF)
+val SubtleText = Color(0xFFB0B0B0)
+val MutedText = Color(0xFF808080)
 
 val FieldErrorRed = Color(0xFFFF6B6B)

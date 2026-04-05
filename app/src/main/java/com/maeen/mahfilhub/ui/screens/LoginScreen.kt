@@ -233,7 +233,7 @@ private fun LoginScreenContent(
             )
             if (uiState.emailError != null) {
                 Text(
-                    text = uiState.emailError!!,
+                    text = uiState.emailError,
                     color = FieldErrorRed,
                     fontSize = 12.sp,
                     modifier = Modifier
@@ -270,7 +270,7 @@ private fun LoginScreenContent(
                     trailingIcon = {
                         IconButton(onClick = onPasswordVisibilityToggle) {
                             Icon(
-                                imageVector = if (passwordVisible) Icons.Filled.Info else Icons.Outlined.Lock,
+                                imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
                                 contentDescription = if (passwordVisible)
                                     stringResource(R.string.cd_hide_password)
                                 else stringResource(R.string.cd_show_password),
@@ -289,7 +289,7 @@ private fun LoginScreenContent(
                 )
                 if (uiState.passwordError != null) {
                     Text(
-                        text = uiState.passwordError!!,
+                        text = uiState.passwordError,
                         color = FieldErrorRed,
                         fontSize = 12.sp,
                         modifier = Modifier

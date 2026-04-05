@@ -116,15 +116,9 @@ fun CompactCard(
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val cardModifier = if (onClick != null) {
-        modifier
-    } else {
-        modifier
-    }
-    
     Card(
         onClick = onClick ?: {},
-        modifier = cardModifier,
+        modifier = modifier,
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor

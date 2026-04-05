@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maeen.mahfilhub.data.model.LoginResponse
 import com.maeen.mahfilhub.data.repository.AuthRepository
-import com.maeen.mahfilhub.data.repository.Resource
+import com.maeen.mahfilhub.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

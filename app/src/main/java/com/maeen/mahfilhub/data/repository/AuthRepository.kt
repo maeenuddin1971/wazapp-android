@@ -3,13 +3,9 @@ package com.maeen.mahfilhub.data.repository
 import com.maeen.mahfilhub.data.model.LoginRequest
 import com.maeen.mahfilhub.data.model.LoginResponse
 import com.maeen.mahfilhub.data.remote.RetrofitClient
+import com.maeen.mahfilhub.util.Resource
 import org.json.JSONObject
-
-sealed class Resource<out T> {
-    data class Success<T>(val data: T) : Resource<T>()
-    data class Error(val message: String) : Resource<Nothing>()
-    data object Loading : Resource<Nothing>()
-}
+import kotlin.coroutines.cancellation.CancellationException
 
 class AuthRepository {
 
@@ -27,6 +23,8 @@ class AuthRepository {
                 val message = parseErrorMessage(errorBody, response.code())
                 Resource.Error(message)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "An unexpected error occurred")
         }
