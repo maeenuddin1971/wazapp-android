@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -562,7 +564,7 @@ private fun ProfileMenuRow(item: ProfileMenuItem) {
         }
 
         Icon(
-            imageVector = Icons.Filled.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             modifier = Modifier.size(20.dp)
@@ -583,7 +585,7 @@ private fun LogoutButton(onLogoutClick: () -> Unit = {}) {
             onDismissRequest = { showDialog = false },
             icon = {
                 Icon(
-                    imageVector = Icons.Outlined.ExitToApp,
+                    imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error
                 )
@@ -633,7 +635,7 @@ private fun LogoutButton(onLogoutClick: () -> Unit = {}) {
         )
     ) {
         Icon(
-            imageVector = Icons.Outlined.ExitToApp,
+            imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
             contentDescription = null,
             modifier = Modifier.size(18.dp)
         )

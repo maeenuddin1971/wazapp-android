@@ -29,7 +29,7 @@ object LocaleHelper {
      * Creates a new context with the given locale applied.
      */
     fun setLocale(context: Context, languageCode: String): Context {
-        val locale = Locale(languageCode)
+        val locale = Locale.forLanguageTag(languageCode)
         Locale.setDefault(locale)
         val config = Configuration(context.resources.configuration)
         config.setLocale(locale)

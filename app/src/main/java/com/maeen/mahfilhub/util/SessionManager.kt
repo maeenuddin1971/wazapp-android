@@ -2,6 +2,7 @@ package com.maeen.mahfilhub.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 /**
  * Simple session manager backed by SharedPreferences.
@@ -33,28 +34,28 @@ object SessionManager {
         role: String,
         email: String = ""
     ) {
-        prefs(context).edit()
-            .putBoolean(KEY_IS_LOGGED_IN, true)
-            .putString(KEY_AUTH_TOKEN, token)
-            .putString(KEY_USER_ROLE, role)
-            .putString(KEY_USER_EMAIL, email)
-            .apply()
+        prefs(context).edit {
+            putBoolean(KEY_IS_LOGGED_IN, true)
+            putString(KEY_AUTH_TOKEN, token)
+            putString(KEY_USER_ROLE, role)
+            putString(KEY_USER_EMAIL, email)
+        }
     }
 
     /**
      * Save login session for guest mode (no token).
      */
     fun loginAsGuest(context: Context) {
-        prefs(context).edit()
-            .putBoolean(KEY_IS_LOGGED_IN, true)
-            .putString(KEY_USER_NAME, "Guest User")
-            .putString(KEY_USER_EMAIL, "guest@mahfilhub.com")
-            .putString(KEY_USER_ROLE, "GUEST")
-            .apply()
+        prefs(context).edit {
+            putBoolean(KEY_IS_LOGGED_IN, true)
+            putString(KEY_USER_NAME, "Guest User")
+            putString(KEY_USER_EMAIL, "guest@mahfilhub.com")
+            putString(KEY_USER_ROLE, "GUEST")
+        }
     }
 
     fun logout(context: Context) {
-        prefs(context).edit().clear().apply()
+        prefs(context).edit { clear() }
     }
 
     // ── Token ───────────────────────────────────────────────────────────

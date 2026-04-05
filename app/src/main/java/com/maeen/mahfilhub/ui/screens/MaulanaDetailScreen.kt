@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -38,7 +39,7 @@ internal fun findMaulanaById(maulanaId: Int): MaulanaItem? {
 }
 
 private fun formatFollowerCount(count: Int): String {
-    return if (count >= 1000) String.format("%.1fK", count / 1000.0) else "$count"
+    return if (count >= 1000) String.format(java.util.Locale.US, "%.1fK", count / 1000.0) else "$count"
 }
 
 // Get events by this maulana from the sample data
@@ -225,7 +226,7 @@ fun MaulanaDetailScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = String.format("%.1f", maulana.rating),
+                                text = String.format(java.util.Locale.US, "%.1f", maulana.rating),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AccentOrange
@@ -649,7 +650,7 @@ private fun MaulanaEventMiniCard(
             }
 
             Icon(
-                imageVector = Icons.Filled.ArrowForward,
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                 modifier = Modifier.size(20.dp)

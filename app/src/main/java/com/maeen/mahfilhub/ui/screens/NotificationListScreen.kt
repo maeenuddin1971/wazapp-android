@@ -286,8 +286,8 @@ fun NotificationListScreen(
             val titleFontSize = lerp(24f, 18f, collapseProgress).sp
             val titleStartPadding = lerp(16f, 56f, collapseProgress).dp
             val titleTopPadding = with(density) {
-                val expandedTop = statusBarPx + with(density) { 110.dp.toPx() }
-                val collapsedTop = statusBarPx + with(density) { 18.dp.toPx() }
+                val expandedTop = statusBarPx + 110.dp.toPx()
+                val collapsedTop = statusBarPx + 18.dp.toPx()
                 lerp(expandedTop, collapsedTop, collapseProgress).toDp()
             }
 

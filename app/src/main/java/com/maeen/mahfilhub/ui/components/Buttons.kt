@@ -78,7 +78,7 @@ fun SecondaryButton(
             contentColor = MaterialTheme.colorScheme.primary,
             disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
         ),
-        border = ButtonDefaults.outlinedButtonBorder.copy(
+        border = ButtonDefaults.outlinedButtonBorder(enabled = enabled).copy(
             width = 1.5.dp
         )
     ) {
