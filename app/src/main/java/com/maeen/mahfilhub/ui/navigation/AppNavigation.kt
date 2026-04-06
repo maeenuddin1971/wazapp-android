@@ -49,6 +49,9 @@ sealed interface AppScreen {
 
     @Serializable
     data class NotificationDetail(val notificationId: Int) : AppScreen
+
+    @Serializable
+    data object EditProfile : AppScreen
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -63,7 +66,8 @@ fun isDarkScreen(key: Any): Boolean = key is AppScreen.Splash ||
     key is AppScreen.EventDetail ||
     key is AppScreen.MaulanaDetail ||
     key is AppScreen.Notifications ||
-    key is AppScreen.NotificationDetail
+    key is AppScreen.NotificationDetail ||
+    key is AppScreen.EditProfile
 
 // ══════════════════════════════════════════════════════════════════════════
 // Animation Specs
@@ -207,6 +211,9 @@ fun AppNavDisplay(
                     onNotificationsClick = {
                         backStack.add(AppScreen.Notifications)
                     },
+                    onEditProfileClick = {
+                        backStack.add(AppScreen.EditProfile)
+                    },
                     onLogoutClick = {
                         SessionManager.logout(context)
                         backStack.clear()
@@ -266,6 +273,19 @@ fun AppNavDisplay(
                     },
                     onMaulanaClick = { maulanaId ->
                         backStack.add(AppScreen.MaulanaDetail(maulanaId))
+                    }
+                )
+            }
+
+            entry<AppScreen.EditProfile>(
+                metadata = slideMetadata()
+            ) {
+                EditProfileScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onSave = {
+                        backStack.removeLastOrNull()
                     }
                 )
             }

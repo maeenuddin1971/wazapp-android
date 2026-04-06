@@ -40,6 +40,7 @@ import com.maeen.mahfilhub.ui.theme.*
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     onNotificationsClick: () -> Unit = {},
+    onEditProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     LazyColumn(
@@ -69,7 +70,8 @@ fun ProfileScreen(
                         icon = Icons.Outlined.Person,
                         title = "Edit Profile",
                         subtitle = "Update your information",
-                        color = PrimaryTeal
+                        color = PrimaryTeal,
+                        onClick = onEditProfileClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Outlined.Notifications,
