@@ -41,6 +41,7 @@ fun ProfileScreen(
     modifier: Modifier = Modifier,
     onNotificationsClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
+    onPrivacySecurityClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     LazyColumn(
@@ -84,7 +85,8 @@ fun ProfileScreen(
                         icon = Icons.Outlined.Lock,
                         title = "Privacy & Security",
                         subtitle = "Password, account security",
-                        color = InfoBlue
+                        color = InfoBlue,
+                        onClick = onPrivacySecurityClick
                     )
                 )
             )
