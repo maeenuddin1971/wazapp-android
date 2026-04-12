@@ -42,6 +42,7 @@ fun ProfileScreen(
     onNotificationsClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
     onPrivacySecurityClick: () -> Unit = {},
+    onSavedEventsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     LazyColumn(
@@ -104,7 +105,8 @@ fun ProfileScreen(
                         title = "Saved Events",
                         subtitle = "12 events saved",
                         color = ErrorRed,
-                        badge = "12"
+                        badge = "12",
+                        onClick = onSavedEventsClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Outlined.Person,

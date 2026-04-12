@@ -55,6 +55,9 @@ sealed interface AppScreen {
 
     @Serializable
     data object PrivacySecurity : AppScreen
+
+    @Serializable
+    data object SavedEvents : AppScreen
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -71,7 +74,8 @@ fun isDarkScreen(key: Any): Boolean = key is AppScreen.Splash ||
     key is AppScreen.Notifications ||
     key is AppScreen.NotificationDetail ||
     key is AppScreen.EditProfile ||
-    key is AppScreen.PrivacySecurity
+    key is AppScreen.PrivacySecurity ||
+    key is AppScreen.SavedEvents
 
 // ══════════════════════════════════════════════════════════════════════════
 // Animation Specs
@@ -221,6 +225,9 @@ fun AppNavDisplay(
                     onPrivacySecurityClick = {
                         backStack.add(AppScreen.PrivacySecurity)
                     },
+                    onSavedEventsClick = {
+                        backStack.add(AppScreen.SavedEvents)
+                    },
                     onLogoutClick = {
                         SessionManager.logout(context)
                         backStack.clear()
@@ -303,6 +310,19 @@ fun AppNavDisplay(
                 PrivacySecurityScreen(
                     onBack = {
                         backStack.removeLastOrNull()
+                    }
+                )
+            }
+
+            entry<AppScreen.SavedEvents>(
+                metadata = slideMetadata()
+            ) {
+                SavedEventsScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onEventClick = { eventId ->
+                        backStack.add(AppScreen.EventDetail(eventId))
                     }
                 )
             }
