@@ -57,6 +57,12 @@ fun HomeScreen(
     onEditProfileClick: () -> Unit = {},
     onPrivacySecurityClick: () -> Unit = {},
     onSavedEventsClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {},
+    onMyRemindersClick: () -> Unit = {},
+    onEventHistoryClick: () -> Unit = {},
+    onLanguageClick: () -> Unit = {},
+    onAboutClick: () -> Unit = {},
+    onHelpFeedbackClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
@@ -118,6 +124,12 @@ fun HomeScreen(
                     onEditProfileClick = onEditProfileClick,
                     onPrivacySecurityClick = onPrivacySecurityClick,
                     onSavedEventsClick = onSavedEventsClick,
+                    onFollowingClick = onFollowingClick,
+                    onMyRemindersClick = onMyRemindersClick,
+                    onEventHistoryClick = onEventHistoryClick,
+                    onLanguageClick = onLanguageClick,
+                    onAboutClick = onAboutClick,
+                    onHelpFeedbackClick = onHelpFeedbackClick,
                     onLogoutClick = onLogoutClick
                 )
                 else -> HomeContent(

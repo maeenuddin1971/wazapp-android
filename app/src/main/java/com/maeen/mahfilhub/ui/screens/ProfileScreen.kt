@@ -43,6 +43,12 @@ fun ProfileScreen(
     onEditProfileClick: () -> Unit = {},
     onPrivacySecurityClick: () -> Unit = {},
     onSavedEventsClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {},
+    onMyRemindersClick: () -> Unit = {},
+    onEventHistoryClick: () -> Unit = {},
+    onLanguageClick: () -> Unit = {},
+    onAboutClick: () -> Unit = {},
+    onHelpFeedbackClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     LazyColumn(
@@ -113,20 +119,23 @@ fun ProfileScreen(
                         title = "Following",
                         subtitle = "8 scholars followed",
                         color = PrimaryTeal,
-                        badge = "8"
+                        badge = "8",
+                        onClick = onFollowingClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Filled.DateRange,
                         title = "My Reminders",
                         subtitle = "3 upcoming reminders",
                         color = SecondaryGreen,
-                        badge = "3"
+                        badge = "3",
+                        onClick = onMyRemindersClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Filled.Star,
                         title = "Event History",
                         subtitle = "Events you attended",
-                        color = AccentOrange
+                        color = AccentOrange,
+                        onClick = onEventHistoryClick
                     )
                 )
             )
@@ -143,7 +152,8 @@ fun ProfileScreen(
                         icon = Icons.Outlined.Place,
                         title = stringResource(R.string.settings_language),
                         subtitle = "English",
-                        color = VerifiedBadge
+                        color = VerifiedBadge,
+                        onClick = onLanguageClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Outlined.Info,
@@ -172,13 +182,15 @@ fun ProfileScreen(
                         icon = Icons.Outlined.Info,
                         title = stringResource(R.string.settings_about),
                         subtitle = "About MahfilHub v1.0",
-                        color = PrimaryTeal
+                        color = PrimaryTeal,
+                        onClick = onAboutClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Outlined.Email,
                         title = "Help & Feedback",
                         subtitle = "Contact us, report issues",
-                        color = InfoBlue
+                        color = InfoBlue,
+                        onClick = onHelpFeedbackClick
                     ),
                     ProfileMenuItem(
                         icon = Icons.Outlined.Share,

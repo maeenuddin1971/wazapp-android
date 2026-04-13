@@ -58,6 +58,24 @@ sealed interface AppScreen {
 
     @Serializable
     data object SavedEvents : AppScreen
+
+    @Serializable
+    data object Following : AppScreen
+
+    @Serializable
+    data object MyReminders : AppScreen
+
+    @Serializable
+    data object EventHistory : AppScreen
+
+    @Serializable
+    data object Language : AppScreen
+
+    @Serializable
+    data object About : AppScreen
+
+    @Serializable
+    data object HelpFeedback : AppScreen
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -75,7 +93,13 @@ fun isDarkScreen(key: Any): Boolean = key is AppScreen.Splash ||
     key is AppScreen.NotificationDetail ||
     key is AppScreen.EditProfile ||
     key is AppScreen.PrivacySecurity ||
-    key is AppScreen.SavedEvents
+    key is AppScreen.SavedEvents ||
+    key is AppScreen.Following ||
+    key is AppScreen.MyReminders ||
+    key is AppScreen.EventHistory ||
+    key is AppScreen.Language ||
+    key is AppScreen.About ||
+    key is AppScreen.HelpFeedback
 
 // ══════════════════════════════════════════════════════════════════════════
 // Animation Specs
@@ -228,6 +252,24 @@ fun AppNavDisplay(
                     onSavedEventsClick = {
                         backStack.add(AppScreen.SavedEvents)
                     },
+                    onFollowingClick = {
+                        backStack.add(AppScreen.Following)
+                    },
+                    onMyRemindersClick = {
+                        backStack.add(AppScreen.MyReminders)
+                    },
+                    onEventHistoryClick = {
+                        backStack.add(AppScreen.EventHistory)
+                    },
+                    onLanguageClick = {
+                        backStack.add(AppScreen.Language)
+                    },
+                    onAboutClick = {
+                        backStack.add(AppScreen.About)
+                    },
+                    onHelpFeedbackClick = {
+                        backStack.add(AppScreen.HelpFeedback)
+                    },
                     onLogoutClick = {
                         SessionManager.logout(context)
                         backStack.clear()
@@ -323,6 +365,75 @@ fun AppNavDisplay(
                     },
                     onEventClick = { eventId ->
                         backStack.add(AppScreen.EventDetail(eventId))
+                    }
+                )
+            }
+
+            entry<AppScreen.Following>(
+                metadata = slideMetadata()
+            ) {
+                FollowingScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onScholarClick = { maulanaId ->
+                        backStack.add(AppScreen.MaulanaDetail(maulanaId))
+                    }
+                )
+            }
+
+            entry<AppScreen.MyReminders>(
+                metadata = slideMetadata()
+            ) {
+                MyRemindersScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onEventClick = { eventId ->
+                        backStack.add(AppScreen.EventDetail(eventId))
+                    }
+                )
+            }
+
+            entry<AppScreen.EventHistory>(
+                metadata = slideMetadata()
+            ) {
+                EventHistoryScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onEventClick = { eventId ->
+                        backStack.add(AppScreen.EventDetail(eventId))
+                    }
+                )
+            }
+
+            entry<AppScreen.Language>(
+                metadata = slideMetadata()
+            ) {
+                LanguageScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+
+            entry<AppScreen.About>(
+                metadata = slideMetadata()
+            ) {
+                AboutScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+
+            entry<AppScreen.HelpFeedback>(
+                metadata = slideMetadata()
+            ) {
+                HelpFeedbackScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
                     }
                 )
             }
