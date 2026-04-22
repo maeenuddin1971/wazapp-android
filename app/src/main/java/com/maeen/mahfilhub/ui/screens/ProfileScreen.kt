@@ -49,7 +49,8 @@ fun ProfileScreen(
     onLanguageClick: () -> Unit = {},
     onAboutClick: () -> Unit = {},
     onHelpFeedbackClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -59,7 +60,7 @@ fun ProfileScreen(
     ) {
         // ── Profile Header ───────────────────────────────────────────
         item {
-            ProfileHeader()
+            ProfileHeader(onSettingsClick = onSettingsClick)
         }
 
         // ── Stats Row ────────────────────────────────────────────────
@@ -227,7 +228,7 @@ fun ProfileScreen(
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun ProfileHeader() {
+private fun ProfileHeader(onSettingsClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -278,7 +279,7 @@ private fun ProfileHeader() {
                 )
 
                 IconButton(
-                    onClick = { },
+                    onClick = onSettingsClick,
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)

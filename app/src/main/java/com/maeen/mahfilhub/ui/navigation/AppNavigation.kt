@@ -76,6 +76,9 @@ sealed interface AppScreen {
 
     @Serializable
     data object HelpFeedback : AppScreen
+
+    @Serializable
+    data object Settings : AppScreen
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -99,7 +102,8 @@ fun isDarkScreen(key: Any): Boolean = key is AppScreen.Splash ||
     key is AppScreen.EventHistory ||
     key is AppScreen.Language ||
     key is AppScreen.About ||
-    key is AppScreen.HelpFeedback
+    key is AppScreen.HelpFeedback ||
+    key is AppScreen.Settings
 
 // ══════════════════════════════════════════════════════════════════════════
 // Animation Specs
@@ -274,6 +278,9 @@ fun AppNavDisplay(
                         SessionManager.logout(context)
                         backStack.clear()
                         backStack.add(AppScreen.Onboarding)
+                    },
+                    onSettingsClick = {
+                        backStack.add(AppScreen.Settings)
                     }
                 )
             }
@@ -434,6 +441,34 @@ fun AppNavDisplay(
                 HelpFeedbackScreen(
                     onBack = {
                         backStack.removeLastOrNull()
+                    }
+                )
+            }
+
+            entry<AppScreen.Settings>(
+                metadata = slideMetadata()
+            ) {
+                SettingsScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onEditProfileClick = {
+                        backStack.add(AppScreen.EditProfile)
+                    },
+                    onNotificationsClick = {
+                        backStack.add(AppScreen.Notifications)
+                    },
+                    onPrivacySecurityClick = {
+                        backStack.add(AppScreen.PrivacySecurity)
+                    },
+                    onLanguageClick = {
+                        backStack.add(AppScreen.Language)
+                    },
+                    onAboutClick = {
+                        backStack.add(AppScreen.About)
+                    },
+                    onHelpFeedbackClick = {
+                        backStack.add(AppScreen.HelpFeedback)
                     }
                 )
             }

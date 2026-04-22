@@ -63,7 +63,8 @@ fun HomeScreen(
     onLanguageClick: () -> Unit = {},
     onAboutClick: () -> Unit = {},
     onHelpFeedbackClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
     val coroutineScope = rememberCoroutineScope()
@@ -130,7 +131,8 @@ fun HomeScreen(
                     onLanguageClick = onLanguageClick,
                     onAboutClick = onAboutClick,
                     onHelpFeedbackClick = onHelpFeedbackClick,
-                    onLogoutClick = onLogoutClick
+                    onLogoutClick = onLogoutClick,
+                    onSettingsClick = onSettingsClick
                 )
                 else -> HomeContent(
                     onEventClick = onEventClick,
