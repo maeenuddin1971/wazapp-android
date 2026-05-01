@@ -1,6 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -32,15 +33,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import com.maeen.mahfilhub.data.model.EventItem
+import com.maeen.mahfilhub.ui.viewmodel.EventsViewModel
 import com.maeen.mahfilhub.ui.theme.*
 
 // ══════════════════════════════════════════════════════════════════════════
-// Helper: resolve event by ID from sample data
+// Event lookup is now delegated to EventsViewModel.eventById()
 // ══════════════════════════════════════════════════════════════════════════
-
-internal fun findEventById(eventId: Int): EventItem? {
-    return sampleEvents.find { it.id == eventId }
-}
 
 // ══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -58,9 +57,10 @@ private val EventToolbarHeight = 56.dp
 fun EventDetailScreen(
     eventId: Int,
     modifier: Modifier = Modifier,
+    eventsViewModel: EventsViewModel = viewModel(),
     onBack: () -> Unit = {}
 ) {
-    val event = remember { findEventById(eventId) }
+    val event = remember { eventsViewModel.eventById(eventId) }
 
     if (event == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

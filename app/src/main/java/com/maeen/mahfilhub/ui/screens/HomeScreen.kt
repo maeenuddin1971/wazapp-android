@@ -35,10 +35,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
+import com.maeen.mahfilhub.data.model.EventItem
+import com.maeen.mahfilhub.ui.viewmodel.EventsViewModel
 import com.maeen.mahfilhub.ui.theme.*
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
 
@@ -66,6 +69,8 @@ fun HomeScreen(
     onLogoutClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {}
 ) {
+    val eventsViewModel: EventsViewModel = viewModel()
+    val eventsState by eventsViewModel.uiState.collectAsState()
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -114,11 +119,15 @@ fun HomeScreen(
         ) { page ->
             when (page) {
                 0 -> HomeContent(
+                    upcomingEvents = eventsState.upcomingEvents,
                     onEventClick = onEventClick,
                     onMaulanaClick = onMaulanaClick,
                     onNotificationsClick = onNotificationsClick
                 )
-                1 -> EventsScreen(onEventClick = onEventClick)
+                1 -> EventsScreen(
+                    eventsViewModel = eventsViewModel,
+                    onEventClick = onEventClick
+                )
                 2 -> MaulanaScreen(onMaulanaClick = onMaulanaClick)
                 3 -> ProfileScreen(
                     onNotificationsClick = onNotificationsClick,
@@ -135,6 +144,7 @@ fun HomeScreen(
                     onSettingsClick = onSettingsClick
                 )
                 else -> HomeContent(
+                    upcomingEvents = eventsState.upcomingEvents,
                     onEventClick = onEventClick,
                     onMaulanaClick = onMaulanaClick,
                     onNotificationsClick = onNotificationsClick
@@ -151,6 +161,7 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     modifier: Modifier = Modifier,
+    upcomingEvents: List<EventItem> = emptyList(),
     onEventClick: (Int) -> Unit = {},
     onMaulanaClick: (Int) -> Unit = {},
     onNotificationsClick: () -> Unit = {}
@@ -163,7 +174,10 @@ private fun HomeContent(
     ) {
         HomeHeader(onNotificationsClick = onNotificationsClick)
         QuickActionsSection()
-        UpcomingEventsSection(onEventClick = onEventClick)
+        UpcomingEventsSection(
+            events = upcomingEvents,
+            onEventClick = onEventClick
+        )
         FeaturedMaulanaSection(onMaulanaClick = onMaulanaClick)
         RecentActivitySection()
         Spacer(modifier = Modifier.height(Spacing.medium))
@@ -386,7 +400,10 @@ private fun QuickActionItem(action: QuickAction) {
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun UpcomingEventsSection(onEventClick: (Int) -> Unit = {}) {
+private fun UpcomingEventsSection(
+    events: List<EventItem> = emptyList(),
+    onEventClick: (Int) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -417,40 +434,24 @@ private fun UpcomingEventsSection(onEventClick: (Int) -> Unit = {}) {
 
         Spacer(modifier = Modifier.height(Spacing.small))
 
-        // Horizontal scrolling event cards
+        // Horizontal scrolling event cards — driven by ViewModel data
         Row(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.medium),
             horizontalArrangement = Arrangement.spacedBy(Spacing.medium)
         ) {
-            EventCard(
-                title = "Friday Waz Mahfil",
-                maulana = "Maulana Abdul Karim",
-                location = "Dhaka Central Mosque",
-                date = "Mar 14, 2026",
-                time = "After Jummah",
-                isLive = false,
-                onClick = { onEventClick(1) }
-            )
-            EventCard(
-                title = "Tafseer Al-Quran",
-                maulana = "Maulana Tariq Jameel",
-                location = "Baitul Mukarram",
-                date = "Mar 15, 2026",
-                time = "After Maghrib",
-                isLive = true,
-                onClick = { onEventClick(2) }
-            )
-            EventCard(
-                title = "Seerah Conference",
-                maulana = "Maulana Hassan",
-                location = "Chittagong Grand Masjid",
-                date = "Mar 18, 2026",
-                time = "10:00 AM",
-                isLive = false,
-                onClick = { onEventClick(3) }
-            )
+            events.forEach { event ->
+                EventCard(
+                    title = event.title,
+                    maulana = event.maulana,
+                    location = event.location,
+                    date = event.date,
+                    time = event.time,
+                    isLive = event.isLive,
+                    onClick = { onEventClick(event.id) }
+                )
+            }
         }
     }
 }

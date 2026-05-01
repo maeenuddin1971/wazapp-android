@@ -1,6 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maeen.mahfilhub.data.model.EventItem
+import com.maeen.mahfilhub.ui.viewmodel.EventsViewModel
 import com.maeen.mahfilhub.ui.theme.*
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -42,10 +45,8 @@ private fun formatFollowerCount(count: Int): String {
     return if (count >= 1000) String.format(java.util.Locale.US, "%.1fK", count / 1000.0) else "$count"
 }
 
-// Get events by this maulana from the sample data
-private fun getEventsByMaulana(maulanaName: String): List<EventItem> {
-    return sampleEvents.filter { it.maulana == maulanaName }
-}
+// Get events by this maulana — now delegated to EventsViewModel
+// (the old helper referenced the removed sampleEvents global)
 
 // ══════════════════════════════════════════════════════════════════════════
 // Maulana Detail Screen
@@ -56,6 +57,7 @@ private fun getEventsByMaulana(maulanaName: String): List<EventItem> {
 fun MaulanaDetailScreen(
     maulanaId: Int,
     modifier: Modifier = Modifier,
+    eventsViewModel: EventsViewModel = viewModel(),
     onBack: () -> Unit = {},
     onEventClick: (Int) -> Unit = {}
 ) {
@@ -68,7 +70,7 @@ fun MaulanaDetailScreen(
         return
     }
 
-    val maulanaEvents = remember { getEventsByMaulana(maulana.name) }
+    val maulanaEvents = remember { eventsViewModel.eventsForMaulana(maulana.name) }
     var isFollowing by remember { mutableStateOf(maulana.isFollowing) }
     val initial = maulana.name.split(" ").lastOrNull()?.take(1) ?: "M"
 

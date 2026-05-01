@@ -1,6 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -47,6 +48,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +68,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
+import com.maeen.mahfilhub.data.model.EventItem
+import com.maeen.mahfilhub.ui.viewmodel.EventsViewModel
 import com.maeen.mahfilhub.ui.theme.AccentOrange
 import com.maeen.mahfilhub.ui.theme.CardShadow
 import com.maeen.mahfilhub.ui.theme.ErrorRed
@@ -76,32 +80,9 @@ import com.maeen.mahfilhub.ui.theme.SecondaryGreen
 import com.maeen.mahfilhub.ui.theme.Spacing
 
 // ──────────────────────────────────────────────────────────────────────────
-// Sample Event Data
+// EventItem model is now in data/model/EventItem.kt
+// Seed data & state logic is now in ui/viewmodel/EventsViewModel.kt
 // ──────────────────────────────────────────────────────────────────────────
-
-data class EventItem(
-    val id: Int,
-    val title: String,
-    val maulana: String,
-    val location: String,
-    val date: String,
-    val time: String,
-    val isLive: Boolean = false,
-    val isFeatured: Boolean = false,
-    val attendees: Int = 0,
-    val category: String = "All"
-)
-
-internal val sampleEvents = listOf(
-    EventItem(1, "Friday Waz Mahfil", "Maulana Abdul Karim", "Dhaka Central Mosque, Motijheel", "Mar 14, 2026", "After Jummah", isLive = true, isFeatured = true, attendees = 245, category = "Today"),
-    EventItem(2, "Tafseer Al-Quran", "Maulana Tariq Jameel", "Baitul Mukarram National Mosque", "Mar 15, 2026", "After Maghrib", isFeatured = true, attendees = 180, category = "This Week"),
-    EventItem(3, "Seerah Conference", "Maulana Hassan Ali", "Chittagong Grand Masjid", "Mar 18, 2026", "10:00 AM", attendees = 320, category = "This Week"),
-    EventItem(4, "Youth Islamic Seminar", "Maulana Ibrahim Khalil", "Sylhet Central Eidgah", "Mar 20, 2026", "3:00 PM", attendees = 150, category = "This Month"),
-    EventItem(5, "Quran Recitation Night", "Qari Muhammad Yusuf", "Rajshahi City Mosque", "Mar 22, 2026", "After Isha", attendees = 95, category = "This Month"),
-    EventItem(6, "Islamic Finance Workshop", "Mufti Abdul Rahman", "BICC, Dhaka", "Mar 25, 2026", "9:00 AM", attendees = 75, category = "This Month"),
-    EventItem(7, "Milad-un-Nabi Program", "Maulana Shah Ahmed", "Khulna Boro Masjid", "Mar 28, 2026", "After Asr", isFeatured = true, attendees = 400, category = "This Month"),
-    EventItem(8, "Dua & Zikr Evening", "Maulana Noor Islam", "Comilla Central Mosque", "Mar 14, 2026", "After Maghrib", attendees = 60, category = "Today")
-)
 
 // ──────────────────────────────────────────────────────────────────────────
 // Events Screen
@@ -111,23 +92,15 @@ internal val sampleEvents = listOf(
 @Composable
 fun EventsScreen(
     modifier: Modifier = Modifier,
+    eventsViewModel: EventsViewModel = viewModel(),
     onEventClick: (Int) -> Unit = {}
 ) {
-    var selectedFilter by remember { mutableStateOf("All") }
-    var searchQuery by remember { mutableStateOf("") }
+    val state by eventsViewModel.uiState.collectAsState()
 
-    val filters = listOf("All", "Today", "This Week", "This Month")
-
-    val filteredEvents = remember(selectedFilter, searchQuery) {
-        sampleEvents.filter { event ->
-            val matchesFilter = selectedFilter == "All" || event.category == selectedFilter
-            val matchesSearch = searchQuery.isEmpty() ||
-                event.title.contains(searchQuery, ignoreCase = true) ||
-                event.maulana.contains(searchQuery, ignoreCase = true) ||
-                event.location.contains(searchQuery, ignoreCase = true)
-            matchesFilter && matchesSearch
-        }
-    }
+    val selectedFilter = state.selectedFilter
+    val searchQuery = state.searchQuery
+    val filters = state.filters
+    val filteredEvents = state.filteredEvents
 
     LazyColumn(
         modifier = modifier
@@ -139,7 +112,7 @@ fun EventsScreen(
         item {
             EventsHeader(
                 searchQuery = searchQuery,
-                onSearchQueryChange = { searchQuery = it }
+                onSearchQueryChange = { eventsViewModel.setSearchQuery(it) }
             )
         }
 
@@ -148,7 +121,7 @@ fun EventsScreen(
             FilterChipsRow(
                 filters = filters,
                 selectedFilter = selectedFilter,
-                onFilterSelected = { selectedFilter = it }
+                onFilterSelected = { eventsViewModel.setFilter(it) }
             )
         }
 
