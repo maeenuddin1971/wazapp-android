@@ -36,7 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
 import com.maeen.mahfilhub.data.model.EventItem
+import com.maeen.mahfilhub.data.model.MaulanaItem
 import com.maeen.mahfilhub.ui.viewmodel.EventsViewModel
+import com.maeen.mahfilhub.ui.viewmodel.MaulanaViewModel
 import com.maeen.mahfilhub.ui.theme.*
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -71,6 +73,8 @@ fun HomeScreen(
 ) {
     val eventsViewModel: EventsViewModel = viewModel()
     val eventsState by eventsViewModel.uiState.collectAsState()
+    val maulanaViewModel: MaulanaViewModel = viewModel()
+    val maulanaState by maulanaViewModel.uiState.collectAsState()
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -120,6 +124,7 @@ fun HomeScreen(
             when (page) {
                 0 -> HomeContent(
                     upcomingEvents = eventsState.upcomingEvents,
+                    featuredMaulanas = maulanaState.featuredMaulanas,
                     onEventClick = onEventClick,
                     onMaulanaClick = onMaulanaClick,
                     onNotificationsClick = onNotificationsClick
@@ -128,7 +133,10 @@ fun HomeScreen(
                     eventsViewModel = eventsViewModel,
                     onEventClick = onEventClick
                 )
-                2 -> MaulanaScreen(onMaulanaClick = onMaulanaClick)
+                2 -> MaulanaScreen(
+                    maulanaViewModel = maulanaViewModel,
+                    onMaulanaClick = onMaulanaClick
+                )
                 3 -> ProfileScreen(
                     onNotificationsClick = onNotificationsClick,
                     onEditProfileClick = onEditProfileClick,
@@ -145,6 +153,7 @@ fun HomeScreen(
                 )
                 else -> HomeContent(
                     upcomingEvents = eventsState.upcomingEvents,
+                    featuredMaulanas = maulanaState.featuredMaulanas,
                     onEventClick = onEventClick,
                     onMaulanaClick = onMaulanaClick,
                     onNotificationsClick = onNotificationsClick
@@ -162,6 +171,7 @@ fun HomeScreen(
 private fun HomeContent(
     modifier: Modifier = Modifier,
     upcomingEvents: List<EventItem> = emptyList(),
+    featuredMaulanas: List<MaulanaItem> = emptyList(),
     onEventClick: (Int) -> Unit = {},
     onMaulanaClick: (Int) -> Unit = {},
     onNotificationsClick: () -> Unit = {}
@@ -178,7 +188,10 @@ private fun HomeContent(
             events = upcomingEvents,
             onEventClick = onEventClick
         )
-        FeaturedMaulanaSection(onMaulanaClick = onMaulanaClick)
+        FeaturedMaulanaSection(
+            maulanas = featuredMaulanas,
+            onMaulanaClick = onMaulanaClick
+        )
         RecentActivitySection()
         Spacer(modifier = Modifier.height(Spacing.medium))
     }
@@ -663,7 +676,10 @@ private fun EventCard(
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun FeaturedMaulanaSection(onMaulanaClick: (Int) -> Unit = {}) {
+private fun FeaturedMaulanaSection(
+    maulanas: List<MaulanaItem> = emptyList(),
+    onMaulanaClick: (Int) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -691,15 +707,20 @@ private fun FeaturedMaulanaSection(onMaulanaClick: (Int) -> Unit = {}) {
 
         Spacer(modifier = Modifier.height(Spacing.small))
 
+        // Horizontal scrolling maulana chips — driven by ViewModel data
         Row(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(Spacing.medium)
         ) {
-            MaulanaChip("Maulana Abdul Karim", "120 Events", true, onClick = { onMaulanaClick(1) })
-            MaulanaChip("Maulana Tariq Jameel", "85 Events", true, onClick = { onMaulanaClick(2) })
-            MaulanaChip("Maulana Hassan Ali", "64 Events", false, onClick = { onMaulanaClick(3) })
-            MaulanaChip("Maulana Ibrahim", "42 Events", false, onClick = { onMaulanaClick(4) })
+            maulanas.forEach { maulana ->
+                MaulanaChip(
+                    name = maulana.name,
+                    eventCount = "${maulana.totalEvents} Events",
+                    isVerified = maulana.isVerified,
+                    onClick = { onMaulanaClick(maulana.id) }
+                )
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.maeen.mahfilhub.ui.screens
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -52,6 +53,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +73,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maeen.mahfilhub.R
+import com.maeen.mahfilhub.data.model.MaulanaItem
+import com.maeen.mahfilhub.ui.viewmodel.MaulanaViewModel
 import com.maeen.mahfilhub.ui.theme.AccentOrange
 import com.maeen.mahfilhub.ui.theme.CardShadow
 import com.maeen.mahfilhub.ui.theme.DividerLight
@@ -84,36 +88,9 @@ import com.maeen.mahfilhub.ui.theme.Spacing
 import com.maeen.mahfilhub.ui.theme.VerifiedBadge
 
 // ──────────────────────────────────────────────────────────────────────────
-// Sample Maulana Data
+// MaulanaItem model is now in data/model/MaulanaItem.kt
+// Seed data & state logic is now in ui/viewmodel/MaulanaViewModel.kt
 // ──────────────────────────────────────────────────────────────────────────
-
-data class MaulanaItem(
-    val id: Int,
-    val name: String,
-    val title: String,
-    val specialization: String,
-    val location: String,
-    val totalEvents: Int,
-    val upcomingEvents: Int,
-    val followers: Int,
-    val rating: Float,
-    val isVerified: Boolean = false,
-    val isFollowing: Boolean = false,
-    val category: String = "All"
-)
-
-internal val sampleMaulanas = listOf(
-    MaulanaItem(1, "Maulana Abdul Karim", "Senior Scholar", "Tafseer & Hadith", "Dhaka, Bangladesh", 120, 3, 4520, 4.9f, isVerified = true, category = "Popular"),
-    MaulanaItem(2, "Maulana Tariq Jameel", "International Speaker", "Dawah & Islah", "Lahore, Pakistan", 85, 2, 12800, 4.8f, isVerified = true, category = "Popular"),
-    MaulanaItem(3, "Maulana Hassan Ali", "Quran Teacher", "Tafseer Al-Quran", "Chittagong, Bangladesh", 64, 1, 2150, 4.7f, isVerified = false, category = "Popular"),
-    MaulanaItem(4, "Maulana Ibrahim Khalil", "Youth Mentor", "Youth & Contemporary Issues", "Sylhet, Bangladesh", 42, 2, 1800, 4.6f, isVerified = false, category = "New"),
-    MaulanaItem(5, "Qari Muhammad Yusuf", "Hafiz & Qari", "Quran Recitation & Tajweed", "Rajshahi, Bangladesh", 35, 1, 980, 4.9f, isVerified = true, category = "New"),
-    MaulanaItem(6, "Mufti Abdul Rahman", "Islamic Finance Expert", "Fiqh & Islamic Finance", "Dhaka, Bangladesh", 28, 0, 1450, 4.5f, isVerified = true, category = "Popular"),
-    MaulanaItem(7, "Maulana Shah Ahmed", "Community Leader", "Seerah & History", "Khulna, Bangladesh", 55, 2, 3200, 4.7f, isVerified = false, category = "Popular"),
-    MaulanaItem(8, "Maulana Noor Islam", "Spiritual Guide", "Tasawwuf & Zikr", "Comilla, Bangladesh", 30, 1, 890, 4.4f, isVerified = false, category = "New"),
-    MaulanaItem(9, "Maulana Fazlur Rahman", "Hadith Scholar", "Sahih Bukhari & Muslim", "Barisal, Bangladesh", 48, 0, 2600, 4.8f, isVerified = true, category = "Popular"),
-    MaulanaItem(10, "Maulana Yusuf Ali", "Education Specialist", "Islamic Education & Tarbiyah", "Rangpur, Bangladesh", 22, 1, 720, 4.3f, isVerified = false, category = "New")
-)
 
 // ──────────────────────────────────────────────────────────────────────────
 // Maulana Screen
@@ -123,27 +100,15 @@ internal val sampleMaulanas = listOf(
 @Composable
 fun MaulanaScreen(
     modifier: Modifier = Modifier,
+    maulanaViewModel: MaulanaViewModel = viewModel(),
     onMaulanaClick: (Int) -> Unit = {}
 ) {
-    var selectedFilter by remember { mutableStateOf("All") }
-    var searchQuery by remember { mutableStateOf("") }
+    val state by maulanaViewModel.uiState.collectAsState()
 
-    val filters = listOf("All", "Popular", "New", "Verified")
-
-    val filteredMaulanas = remember(selectedFilter, searchQuery) {
-        sampleMaulanas.filter { maulana ->
-            val matchesFilter = when (selectedFilter) {
-                "All" -> true
-                "Verified" -> maulana.isVerified
-                else -> maulana.category == selectedFilter
-            }
-            val matchesSearch = searchQuery.isEmpty() ||
-                maulana.name.contains(searchQuery, ignoreCase = true) ||
-                maulana.specialization.contains(searchQuery, ignoreCase = true) ||
-                maulana.location.contains(searchQuery, ignoreCase = true)
-            matchesFilter && matchesSearch
-        }
-    }
+    val selectedFilter = state.selectedFilter
+    val searchQuery = state.searchQuery
+    val filters = state.filters
+    val filteredMaulanas = state.filteredMaulanas
 
     LazyColumn(
         modifier = modifier
@@ -155,13 +120,17 @@ fun MaulanaScreen(
         item {
             MaulanaHeader(
                 searchQuery = searchQuery,
-                onSearchQueryChange = { searchQuery = it }
+                onSearchQueryChange = { maulanaViewModel.setSearchQuery(it) }
             )
         }
 
         // ── Stats Row ────────────────────────────────────────────────
         item {
-            MaulanaStatsRow()
+            MaulanaStatsRow(
+                totalCount = state.totalCount,
+                verifiedCount = state.verifiedCount,
+                totalUpcomingEvents = state.totalUpcomingEvents
+            )
         }
 
         // ── Filter Chips ─────────────────────────────────────────────
@@ -169,7 +138,7 @@ fun MaulanaScreen(
             MaulanaFilterChips(
                 filters = filters,
                 selectedFilter = selectedFilter,
-                onFilterSelected = { selectedFilter = it }
+                onFilterSelected = { maulanaViewModel.setFilter(it) }
             )
         }
 
@@ -189,7 +158,7 @@ fun MaulanaScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${sampleMaulanas.count { it.isVerified }} Verified",
+                    text = "${state.verifiedCount} Verified",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = VerifiedBadge
@@ -357,7 +326,11 @@ private fun MaulanaHeader(
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun MaulanaStatsRow() {
+private fun MaulanaStatsRow(
+    totalCount: Int,
+    verifiedCount: Int,
+    totalUpcomingEvents: Int
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -365,21 +338,21 @@ private fun MaulanaStatsRow() {
         horizontalArrangement = Arrangement.spacedBy(Spacing.medium)
     ) {
         StatCard(
-            value = "${sampleMaulanas.size}",
+            value = "$totalCount",
             label = "Total",
             icon = Icons.Filled.Person,
             color = PrimaryTeal,
             modifier = Modifier.weight(1f)
         )
         StatCard(
-            value = "${sampleMaulanas.count { it.isVerified }}",
+            value = "$verifiedCount",
             label = "Verified",
             icon = Icons.Filled.CheckCircle,
             color = VerifiedBadge,
             modifier = Modifier.weight(1f)
         )
         StatCard(
-            value = "${sampleMaulanas.sumOf { it.upcomingEvents }}",
+            value = "$totalUpcomingEvents",
             label = "Upcoming",
             icon = Icons.Filled.DateRange,
             color = AccentOrange,

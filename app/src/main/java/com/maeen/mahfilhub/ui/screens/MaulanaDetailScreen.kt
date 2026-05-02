@@ -29,17 +29,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maeen.mahfilhub.data.model.EventItem
+import com.maeen.mahfilhub.data.model.MaulanaItem
 import com.maeen.mahfilhub.ui.viewmodel.EventsViewModel
+import com.maeen.mahfilhub.ui.viewmodel.MaulanaViewModel
 import com.maeen.mahfilhub.ui.theme.*
 
 // ══════════════════════════════════════════════════════════════════════════
-// Helper
+// Maulana lookup is now delegated to MaulanaViewModel.maulanaById()
 // ══════════════════════════════════════════════════════════════════════════
-
-internal fun findMaulanaById(maulanaId: Int): MaulanaItem? {
-    return sampleMaulanas.find { it.id == maulanaId }
-}
 
 private fun formatFollowerCount(count: Int): String {
     return if (count >= 1000) String.format(java.util.Locale.US, "%.1fK", count / 1000.0) else "$count"
@@ -57,11 +54,12 @@ private fun formatFollowerCount(count: Int): String {
 fun MaulanaDetailScreen(
     maulanaId: Int,
     modifier: Modifier = Modifier,
+    maulanaViewModel: MaulanaViewModel = viewModel(),
     eventsViewModel: EventsViewModel = viewModel(),
     onBack: () -> Unit = {},
     onEventClick: (Int) -> Unit = {}
 ) {
-    val maulana = remember { findMaulanaById(maulanaId) }
+    val maulana = remember { maulanaViewModel.maulanaById(maulanaId) }
 
     if (maulana == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -401,7 +399,10 @@ fun MaulanaDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = { isFollowing = !isFollowing },
+                    onClick = {
+                        isFollowing = !isFollowing
+                        maulanaViewModel.toggleFollow(maulanaId)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp),
