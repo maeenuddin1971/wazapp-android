@@ -1,5 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -32,97 +34,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maeen.mahfilhub.data.model.NotificationItem
+import com.maeen.mahfilhub.data.model.NotificationType
+import com.maeen.mahfilhub.ui.viewmodel.NotificationsViewModel
 import com.maeen.mahfilhub.ui.theme.*
 import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.delay
 
 // ══════════════════════════════════════════════════════════════════════════
-// Sample Data
+// NotificationItem model is now in data/model/NotificationItem.kt
+// Seed data & state logic is now in ui/viewmodel/NotificationsViewModel.kt
 // ══════════════════════════════════════════════════════════════════════════
-
-data class NotificationItem(
-    val id: Int,
-    val title: String,
-    val message: String,
-    val time: String,
-    val type: NotificationType,
-    val isRead: Boolean = false,
-    val relatedId: Int? = null
-)
-
-enum class NotificationType {
-    EVENT, MAULANA, SYSTEM, REMINDER, COMMUNITY
-}
-
-internal val sampleNotifications = listOf(
-    NotificationItem(
-        id = 1,
-        title = "New Event Added",
-        message = "Friday Waz Mahfil by Maulana Abdul Karim has been scheduled at Dhaka Central Mosque. Don't miss this enlightening session!",
-        time = "2 min ago",
-        type = NotificationType.EVENT,
-        relatedId = 1
-    ),
-    NotificationItem(
-        id = 2,
-        title = "Event Starting Soon",
-        message = "Tafseer Al-Quran session by Maulana Tariq Jameel is starting in 30 minutes at Baitul Mukarram National Mosque.",
-        time = "30 min ago",
-        type = NotificationType.REMINDER,
-        relatedId = 2
-    ),
-    NotificationItem(
-        id = 3,
-        title = "Maulana Hassan Ali",
-        message = "Maulana Hassan Ali has been verified and joined the platform. Follow to get updates about upcoming events.",
-        time = "1 hour ago",
-        type = NotificationType.MAULANA,
-        isRead = true,
-        relatedId = 3
-    ),
-    NotificationItem(
-        id = 4,
-        title = "Seerah Conference Update",
-        message = "The venue for the Seerah Conference has been updated to Chittagong Grand Masjid. Please check the event details for more info.",
-        time = "2 hours ago",
-        type = NotificationType.EVENT,
-        isRead = true,
-        relatedId = 3
-    ),
-    NotificationItem(
-        id = 5,
-        title = "Welcome to MahfilHub!",
-        message = "Assalamu Alaikum! Welcome to MahfilHub. Explore events, follow your favorite scholars, and stay connected with the community.",
-        time = "3 hours ago",
-        type = NotificationType.SYSTEM,
-        isRead = true
-    ),
-    NotificationItem(
-        id = 6,
-        title = "Community Milestone",
-        message = "MahfilHub has reached 10,000 active users! JazakAllah Khair for being a part of this growing community.",
-        time = "1 day ago",
-        type = NotificationType.COMMUNITY,
-        isRead = true
-    ),
-    NotificationItem(
-        id = 7,
-        title = "Reminder: Youth Islamic Seminar",
-        message = "Don't forget the Youth Islamic Seminar tomorrow at 3:00 PM at Sylhet Central Eidgah. Set your reminder now!",
-        time = "1 day ago",
-        type = NotificationType.REMINDER,
-        isRead = true,
-        relatedId = 4
-    ),
-    NotificationItem(
-        id = 8,
-        title = "New Feature: Event Reminders",
-        message = "You can now set reminders for upcoming events. Tap the bell icon on any event to get notified before it starts.",
-        time = "2 days ago",
-        type = NotificationType.SYSTEM,
-        isRead = true
-    )
-)
 
 // ══════════════════════════════════════════════════════════════════════════
 // Notification List Screen — Collapsing Header
@@ -135,22 +57,16 @@ private val ToolbarHeight = 56.dp   // collapsed toolbar area (below status bar)
 @Composable
 fun NotificationListScreen(
     modifier: Modifier = Modifier,
+    notificationsViewModel: NotificationsViewModel = viewModel(),
     onBack: () -> Unit = {},
     onNotificationClick: (Int) -> Unit = {}
 ) {
-    var selectedFilter by remember { mutableStateOf("All") }
-    val filters = listOf("All", "Events", "Reminders", "System")
+    val state by notificationsViewModel.uiState.collectAsState()
 
-    val filteredNotifications = remember(selectedFilter) {
-        when (selectedFilter) {
-            "Events" -> sampleNotifications.filter { it.type == NotificationType.EVENT || it.type == NotificationType.MAULANA }
-            "Reminders" -> sampleNotifications.filter { it.type == NotificationType.REMINDER }
-            "System" -> sampleNotifications.filter { it.type == NotificationType.SYSTEM || it.type == NotificationType.COMMUNITY }
-            else -> sampleNotifications
-        }
-    }
-
-    val unreadCount = sampleNotifications.count { !it.isRead }
+    val selectedFilter = state.selectedFilter
+    val filters = state.filters
+    val filteredNotifications = state.filteredNotifications
+    val unreadCount = state.unreadCount
 
     // ── Collapsing header state ────────────────────────────────────────
     val density = LocalDensity.current
@@ -347,7 +263,7 @@ fun NotificationListScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.7f)
                     )
-                    TextButton(onClick = { }) {
+                    TextButton(onClick = { notificationsViewModel.markAllAsRead() }) {
                         Text(
                             text = "Mark all read",
                             style = MaterialTheme.typography.labelMedium,
@@ -365,7 +281,7 @@ fun NotificationListScreen(
                     filters.forEach { filter ->
                         val isSelected = filter == selectedFilter
                         Surface(
-                            onClick = { selectedFilter = filter },
+                            onClick = { notificationsViewModel.setFilter(filter) },
                             shape = RoundedCornerShape(20.dp),
                             color = if (isSelected) Color.White else Color.White.copy(alpha = 0.15f)
                         ) {
@@ -526,6 +442,4 @@ private fun notificationTypeIcon(type: NotificationType): Pair<ImageVector, Colo
     }
 }
 
-internal fun findNotificationById(notificationId: Int): NotificationItem? {
-    return sampleNotifications.find { it.id == notificationId }
-}
+// Notification lookup is now delegated to NotificationsViewModel.notificationById()

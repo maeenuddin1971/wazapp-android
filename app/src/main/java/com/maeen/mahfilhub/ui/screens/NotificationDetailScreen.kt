@@ -1,5 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -29,6 +31,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import com.maeen.mahfilhub.data.model.NotificationType
+import com.maeen.mahfilhub.ui.viewmodel.NotificationsViewModel
 import com.maeen.mahfilhub.ui.theme.*
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -47,11 +51,19 @@ private val DetailToolbarHeight = 56.dp
 fun NotificationDetailScreen(
     notificationId: Int,
     modifier: Modifier = Modifier,
+    notificationsViewModel: NotificationsViewModel = viewModel(),
     onBack: () -> Unit = {},
     onEventClick: ((Int) -> Unit)? = null,
     onMaulanaClick: ((Int) -> Unit)? = null
 ) {
-    val notification = remember { findNotificationById(notificationId) }
+    val notification = remember {
+        notificationsViewModel.notificationById(notificationId)
+    }
+
+    // Mark as read when the detail screen opens
+    LaunchedEffect(notificationId) {
+        notificationsViewModel.markAsRead(notificationId)
+    }
 
     if (notification == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
