@@ -1,5 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
+
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -36,64 +38,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import com.maeen.mahfilhub.data.model.FollowedScholar
+import com.maeen.mahfilhub.ui.viewmodel.FollowingViewModel
 import com.maeen.mahfilhub.ui.theme.*
 import kotlinx.coroutines.delay
 // ══════════════════════════════════════════════════════════════════════════
-// Sample Following Data
+// FollowedScholar model is now in data/model/FollowedScholar.kt
+// Seed data & state logic is now in ui/viewmodel/FollowingViewModel.kt
 // ══════════════════════════════════════════════════════════════════════════
-private data class FollowedScholar(
-    val id: Int,
-    val name: String,
-    val title: String,
-    val location: String,
-    val followedSince: String,
-    val upcomingEvents: Int = 0,
-    val totalEvents: Int = 0,
-    val isVerified: Boolean = false,
-    val initial: String = name.first().toString()
-)
-private val sampleFollowedScholars = listOf(
-    FollowedScholar(
-        id = 1, name = "Maulana Abdul Karim", title = "Senior Islamic Scholar",
-        location = "Dhaka, Bangladesh", followedSince = "Following since Jan 2026",
-        upcomingEvents = 3, totalEvents = 45, isVerified = true
-    ),
-    FollowedScholar(
-        id = 2, name = "Maulana Tariq Jameel", title = "International Speaker",
-        location = "Lahore, Pakistan", followedSince = "Following since Mar 2025",
-        upcomingEvents = 1, totalEvents = 120, isVerified = true
-    ),
-    FollowedScholar(
-        id = 3, name = "Maulana Hassan Ali", title = "Quran Scholar",
-        location = "Chittagong, Bangladesh", followedSince = "Following since Jun 2025",
-        upcomingEvents = 2, totalEvents = 30, isVerified = true
-    ),
-    FollowedScholar(
-        id = 4, name = "Maulana Ibrahim Khalil", title = "Youth Motivational Speaker",
-        location = "Sylhet, Bangladesh", followedSince = "Following since Sep 2025",
-        upcomingEvents = 0, totalEvents = 18
-    ),
-    FollowedScholar(
-        id = 5, name = "Qari Muhammad Yusuf", title = "Hafiz & Qari",
-        location = "Rajshahi, Bangladesh", followedSince = "Following since Nov 2025",
-        upcomingEvents = 1, totalEvents = 22, isVerified = true
-    ),
-    FollowedScholar(
-        id = 6, name = "Mufti Abdul Rahman", title = "Islamic Finance Expert",
-        location = "Dhaka, Bangladesh", followedSince = "Following since Dec 2025",
-        upcomingEvents = 0, totalEvents = 15
-    ),
-    FollowedScholar(
-        id = 7, name = "Maulana Shah Ahmed", title = "Hadith Scholar",
-        location = "Khulna, Bangladesh", followedSince = "Following since Feb 2026",
-        upcomingEvents = 2, totalEvents = 55, isVerified = true
-    ),
-    FollowedScholar(
-        id = 8, name = "Maulana Noor Islam", title = "Tafseer Specialist",
-        location = "Comilla, Bangladesh", followedSince = "Following since Mar 2026",
-        upcomingEvents = 1, totalEvents = 28
-    )
-)
 // ══════════════════════════════════════════════════════════════════════════
 // Constants
 // ══════════════════════════════════════════════════════════════════════════
@@ -106,9 +58,11 @@ private val FollowingToolbarHeight = 56.dp
 @Composable
 fun FollowingScreen(
     modifier: Modifier = Modifier,
+    followingViewModel: FollowingViewModel = viewModel(),
     onBack: () -> Unit = {},
     onScholarClick: (Int) -> Unit = {}
 ) {
+    val state by followingViewModel.uiState.collectAsState()
     val density = LocalDensity.current
     val statusBarPx = WindowInsets.statusBars.getTop(density).toFloat()
     val toolbarPx = with(density) { FollowingToolbarHeight.toPx() }
@@ -141,12 +95,12 @@ fun FollowingScreen(
         ) {
             item {
                 FollowingStatsBar(
-                    totalFollowing = sampleFollowedScholars.size,
-                    withUpcoming = sampleFollowedScholars.count { it.upcomingEvents > 0 }
+                    totalFollowing = state.totalFollowing,
+                    withUpcoming = state.withUpcomingCount
                 )
             }
             itemsIndexed(
-                items = sampleFollowedScholars,
+                items = state.scholars,
                 key = { _, item -> item.id }
             ) { index, scholar ->
                 var visible by remember { mutableStateOf(false) }
@@ -210,8 +164,8 @@ fun FollowingScreen(
                     .graphicsLayer { alpha = (1f - collapseProgress * 2.5f).coerceIn(0f, 1f) },
                 horizontalArrangement = Arrangement.spacedBy(Spacing.small)
             ) {
-                FollowingHeaderChip(Icons.Filled.Person, "${sampleFollowedScholars.size} Following")
-                FollowingHeaderChip(Icons.Filled.DateRange, "${sampleFollowedScholars.sumOf { it.upcomingEvents }} Upcoming")
+                FollowingHeaderChip(Icons.Filled.Person, "${state.totalFollowing} Following")
+                FollowingHeaderChip(Icons.Filled.DateRange, "${state.totalUpcomingEvents} Upcoming")
             }
         }
     }
