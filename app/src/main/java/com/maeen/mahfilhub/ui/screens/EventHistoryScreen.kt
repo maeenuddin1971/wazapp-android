@@ -1,6 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -36,22 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import com.maeen.mahfilhub.data.model.HistoryEventItem
 import com.maeen.mahfilhub.ui.theme.*
+import com.maeen.mahfilhub.ui.viewmodel.EventHistoryViewModel
 import kotlinx.coroutines.delay
-
-private data class HistoryEventItem(
-    val id: Int, val title: String, val maulana: String,
-    val location: String, val date: String, val attendees: Int, val rating: Float = 0f
-)
-
-private val sampleHistoryEvents = listOf(
-    HistoryEventItem(1, "Quran Recitation Night", "Qari Muhammad Yusuf", "Rajshahi City Mosque", "Mar 22, 2026", 95, 4.8f),
-    HistoryEventItem(2, "Islamic Finance Workshop", "Mufti Abdul Rahman", "BICC, Dhaka", "Mar 10, 2026", 75, 4.5f),
-    HistoryEventItem(3, "Milad-un-Nabi Program", "Maulana Shah Ahmed", "Khulna Boro Masjid", "Mar 5, 2026", 400, 4.9f),
-    HistoryEventItem(4, "Dua & Zikr Evening", "Maulana Noor Islam", "Comilla Central Mosque", "Feb 28, 2026", 60, 4.3f),
-    HistoryEventItem(5, "Friday Waz Mahfil", "Maulana Abdul Karim", "Dhaka Central Mosque", "Feb 14, 2026", 230, 4.7f),
-    HistoryEventItem(6, "Youth Islamic Seminar", "Maulana Ibrahim Khalil", "Sylhet Central Eidgah", "Jan 20, 2026", 150, 4.6f)
-)
 
 private val HistoryExpandedHeaderHeight = 220.dp
 private val HistoryToolbarHeight = 56.dp
@@ -60,9 +49,11 @@ private val HistoryToolbarHeight = 56.dp
 @Composable
 fun EventHistoryScreen(
     modifier: Modifier = Modifier,
+    eventHistoryViewModel: EventHistoryViewModel = viewModel(),
     onBack: () -> Unit = {},
     onEventClick: (Int) -> Unit = {}
 ) {
+    val state by eventHistoryViewModel.uiState.collectAsState()
     val density = LocalDensity.current
     val statusBarPx = WindowInsets.statusBars.getTop(density).toFloat()
     val toolbarPx = with(density) { HistoryToolbarHeight.toPx() }
@@ -92,14 +83,14 @@ fun EventHistoryScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("${sampleHistoryEvents.size} events attended", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${state.totalEvents} events attended", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Icon(Icons.Filled.Star, null, tint = AccentOrange, modifier = Modifier.size(14.dp))
-                        Text("Avg ${String.format(java.util.Locale.US, "%.1f", sampleHistoryEvents.map { it.rating }.average())}", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = AccentOrange)
+                        Text("Avg ${String.format(java.util.Locale.US, "%.1f", state.averageRating)}", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = AccentOrange)
                     }
                 }
             }
-            itemsIndexed(sampleHistoryEvents, key = { _, item -> item.id }) { index, event ->
+            itemsIndexed(state.events, key = { _, item -> item.id }) { index, event ->
                 var visible by remember { mutableStateOf(false) }
                 LaunchedEffect(Unit) { delay(index * 50L); visible = true }
                 AnimatedVisibility(visible = visible, enter = fadeIn(tween(300)) + slideInVertically(initialOffsetY = { it / 4 }, animationSpec = tween(300))) {
@@ -137,7 +128,7 @@ fun EventHistoryScreen(
                 Surface(shape = RoundedCornerShape(20.dp), color = Color.White.copy(alpha = 0.15f)) {
                     Row(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(14.dp))
-                        Text("${sampleHistoryEvents.size} Attended", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color.White)
+                        Text("${state.totalEvents} Attended", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color.White)
                     }
                 }
             }
@@ -205,4 +196,3 @@ private fun EventHistoryScreenPreview() {
 private fun EventHistoryScreenDarkPreview() {
     MahfilHubTheme(darkTheme = true) { EventHistoryScreen() }
 }
-

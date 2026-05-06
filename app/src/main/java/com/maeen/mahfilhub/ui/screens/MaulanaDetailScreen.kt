@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maeen.mahfilhub.data.model.EventItem
 import com.maeen.mahfilhub.data.model.MaulanaItem
 import com.maeen.mahfilhub.ui.viewmodel.EventsViewModel
 import com.maeen.mahfilhub.ui.viewmodel.MaulanaViewModel
