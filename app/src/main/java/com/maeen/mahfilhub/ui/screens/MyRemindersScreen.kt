@@ -1,6 +1,7 @@
 package com.maeen.mahfilhub.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -36,25 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import com.maeen.mahfilhub.data.model.ReminderItem
 import com.maeen.mahfilhub.ui.theme.*
+import com.maeen.mahfilhub.ui.viewmodel.MyRemindersViewModel
 import kotlinx.coroutines.delay
-
-private data class ReminderItem(
-    val id: Int,
-    val eventTitle: String,
-    val maulana: String,
-    val date: String,
-    val time: String,
-    val location: String,
-    val reminderTime: String,
-    val daysUntil: Int = 0
-)
-
-private val sampleReminders = listOf(
-    ReminderItem(1, "Friday Waz Mahfil", "Maulana Abdul Karim", "Apr 18, 2026", "After Jummah", "Dhaka Central Mosque", "1 hour before", 5),
-    ReminderItem(2, "Tafseer Al-Quran", "Maulana Tariq Jameel", "Apr 20, 2026", "After Maghrib", "Baitul Mukarram", "30 min before", 7),
-    ReminderItem(3, "Seerah Conference", "Maulana Hassan Ali", "Apr 25, 2026", "10:00 AM", "Chittagong Grand Masjid", "1 day before", 12)
-)
 
 private val RemindersExpandedHeaderHeight = 220.dp
 private val RemindersToolbarHeight = 56.dp
@@ -63,9 +49,11 @@ private val RemindersToolbarHeight = 56.dp
 @Composable
 fun MyRemindersScreen(
     modifier: Modifier = Modifier,
+    myRemindersViewModel: MyRemindersViewModel = viewModel(),
     onBack: () -> Unit = {},
     onEventClick: (Int) -> Unit = {}
 ) {
+    val state by myRemindersViewModel.uiState.collectAsState()
     val density = LocalDensity.current
     val statusBarPx = WindowInsets.statusBars.getTop(density).toFloat()
     val toolbarPx = with(density) { RemindersToolbarHeight.toPx() }
@@ -96,7 +84,7 @@ fun MyRemindersScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "${sampleReminders.size} active reminders",
+                        "${state.totalReminders} active reminders",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -106,7 +94,7 @@ fun MyRemindersScreen(
                     }
                 }
             }
-            itemsIndexed(sampleReminders, key = { _, item -> item.id }) { index, reminder ->
+            itemsIndexed(state.reminders, key = { _, item -> item.id }) { index, reminder ->
                 var visible by remember { mutableStateOf(false) }
                 LaunchedEffect(Unit) { delay(index * 50L); visible = true }
                 AnimatedVisibility(
@@ -154,7 +142,7 @@ fun MyRemindersScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Icon(Icons.Filled.Notifications, null, tint = Color.White, modifier = Modifier.size(14.dp))
-                        Text("${sampleReminders.size} Reminders", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color.White)
+                        Text("${state.totalReminders} Reminders", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color.White)
                     }
                 }
             }
@@ -230,4 +218,3 @@ private fun MyRemindersScreenPreview() {
 private fun MyRemindersScreenDarkPreview() {
     MahfilHubTheme(darkTheme = true) { MyRemindersScreen() }
 }
-
