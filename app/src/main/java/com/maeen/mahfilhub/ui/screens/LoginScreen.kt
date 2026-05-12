@@ -47,6 +47,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,7 +90,9 @@ import com.maeen.mahfilhub.ui.theme.PrimaryTealLight
 import com.maeen.mahfilhub.ui.theme.SubtleText
 import com.maeen.mahfilhub.ui.viewmodel.LoginUiState
 import com.maeen.mahfilhub.ui.viewmodel.LoginViewModel
+import com.maeen.mahfilhub.util.GoogleSignInHelper
 import com.maeen.mahfilhub.util.SessionManager
+import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -115,6 +118,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val uiState by viewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     // Navigate on successful login
     LaunchedEffect(uiState.loginResponse) {
@@ -175,6 +179,20 @@ fun LoginScreen(
             keyboardController?.hide()
             viewModel.login(email, password)
         },
+        onGoogleClick = {
+            coroutineScope.launch {
+                GoogleSignInHelper.getIdToken(context)
+                    .onSuccess { idToken ->
+                        viewModel.googleLogin(idToken)
+                    }
+                    .onFailure { error ->
+                        snackbarHostState.showSnackbar(
+                            message = error.localizedMessage ?: "Google sign-in failed",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+            }
+        },
         onNavigateToRegister = onNavigateToRegister,
         onGuestMode = onGuestMode
     )
@@ -193,6 +211,7 @@ private fun LoginScreenContent(
     onPasswordChange: (String) -> Unit = {},
     onPasswordVisibilityToggle: () -> Unit = {},
     onLoginClick: () -> Unit = {},
+    onGoogleClick: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
     onGuestMode: () -> Unit = {}
 ) {
@@ -434,7 +453,8 @@ private fun LoginScreenContent(
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 OutlinedButton(
-                    onClick = { },
+                    onClick = onGoogleClick,
+                    enabled = !uiState.isLoading,
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),

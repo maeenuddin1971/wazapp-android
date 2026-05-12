@@ -73,6 +73,31 @@ class LoginViewModel(
         }
     }
 
+    fun googleLogin(idToken: String) {
+        if (idToken.isBlank()) {
+            _uiState.value = LoginUiState(errorMessage = "Google sign-in failed")
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = LoginUiState(isLoading = true)
+            when (val result = repository.googleLogin(idToken)) {
+                is Resource.Success -> {
+                    _uiState.value = LoginUiState(
+                        loginResponse = result.data,
+                        successMessage = "Login successful!"
+                    )
+                }
+                is Resource.Error -> {
+                    _uiState.value = LoginUiState(errorMessage = result.message)
+                }
+                is Resource.Loading -> {
+                    // Already handled above
+                }
+            }
+        }
+    }
+
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
@@ -89,4 +114,3 @@ class LoginViewModel(
         _uiState.value = LoginUiState()
     }
 }
-

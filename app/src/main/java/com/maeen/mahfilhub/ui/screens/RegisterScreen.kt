@@ -32,8 +32,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maeen.mahfilhub.R
 import com.maeen.mahfilhub.ui.theme.*
+import com.maeen.mahfilhub.ui.viewmodel.LoginViewModel
+import com.maeen.mahfilhub.util.GoogleSignInHelper
+import com.maeen.mahfilhub.util.SessionManager
+import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -47,15 +52,42 @@ import kotlin.math.sin
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = viewModel(),
     onRegisterSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     var name by remember { mutableStateOf("") }
     var emailOrPhone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var agreeTerms by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.loginResponse) {
+        uiState.loginResponse?.let { response ->
+            SessionManager.login(
+                context = context,
+                token = response.token,
+                role = response.role
+            )
+            onRegisterSuccess()
+            viewModel.resetState()
+        }
+    }
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearError()
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         // ── Gradient background ───────────────────────────────────────
@@ -281,7 +313,21 @@ fun RegisterScreen(
 
             // ── Google Sign-up ────────────────────────────────────────
             OutlinedButton(
-                onClick = { },
+                onClick = {
+                    coroutineScope.launch {
+                        GoogleSignInHelper.getIdToken(context)
+                            .onSuccess { idToken ->
+                                viewModel.googleLogin(idToken)
+                            }
+                            .onFailure { error ->
+                                snackbarHostState.showSnackbar(
+                                    message = error.localizedMessage ?: "Google sign-in failed",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                    }
+                },
+                enabled = !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -328,6 +374,13 @@ fun RegisterScreen(
                 )
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+        )
     }
 }
 
