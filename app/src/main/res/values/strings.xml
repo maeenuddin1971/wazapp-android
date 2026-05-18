@@ -31,7 +31,7 @@
     <string name="auth_confirm_password">Confirm Password</string>
     <string name="auth_forgot_password">Forgot Password?</string>
     <string name="auth_sign_in_google">Sign in with Google</string>
-    <string name="google_web_client_id" translatable="false">831250267030-c56e35io5gmcahjjpljbu3n3pr1b3r5g.apps.googleusercontent.com</string>
+    <string name="google_web_client_id" translatable="false">1084499561852-piug5gp501g3plc81jsmr1inb5oac15b.apps.googleusercontent.com</string>
     <string name="auth_sign_in_facebook">Sign in with Facebook</string>
     <string name="auth_or">OR</string>
     <string name="auth_no_account">Don\'t have an account?</string>
