@@ -79,6 +79,9 @@ sealed interface AppScreen {
 
     @Serializable
     data object Settings : AppScreen
+
+    @Serializable
+    data object MaulanaSignup : AppScreen
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -103,7 +106,8 @@ fun isDarkScreen(key: Any): Boolean = key is AppScreen.Splash ||
     key is AppScreen.Language ||
     key is AppScreen.About ||
     key is AppScreen.HelpFeedback ||
-    key is AppScreen.Settings
+    key is AppScreen.Settings ||
+    key is AppScreen.MaulanaSignup
 
 // ══════════════════════════════════════════════════════════════════════════
 // Animation Specs
@@ -229,6 +233,28 @@ fun AppNavDisplay(
                         backStack.add(AppScreen.Main)
                     },
                     onNavigateToLogin = {
+                        backStack.removeLastOrNull()
+                    },
+                    onNavigateToMaulanaSignup = {
+                        backStack.add(AppScreen.MaulanaSignup)
+                    }
+                )
+            }
+
+            entry<AppScreen.MaulanaSignup>(
+                metadata = slideMetadata()
+            ) {
+                MaulanaSignupScreen(
+                    onSignupSuccess = {
+                        SessionManager.login(context, token = "", role = "ROLE_MAULANA", email = "maulana@mahfilhub.com")
+                        backStack.clear()
+                        backStack.add(AppScreen.Main)
+                    },
+                    onNavigateToLogin = {
+                        backStack.clear()
+                        backStack.add(AppScreen.Login)
+                    },
+                    onBack = {
                         backStack.removeLastOrNull()
                     }
                 )

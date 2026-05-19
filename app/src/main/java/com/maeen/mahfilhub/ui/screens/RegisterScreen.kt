@@ -54,7 +54,8 @@ fun RegisterScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = viewModel(),
     onRegisterSuccess: () -> Unit = {},
-    onNavigateToLogin: () -> Unit = {}
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToMaulanaSignup: () -> Unit = {}
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -347,6 +348,35 @@ fun RegisterScreen(
                 Text(
                     text = "Sign up with Google",
                     color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── Register as Maulana ───────────────────────────────────
+            OutlinedButton(
+                onClick = onNavigateToMaulanaSignup,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+                    brush = Brush.linearGradient(listOf(IslamicGoldMuted, IslamicGoldMuted))
+                ),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = GlassBackground)
+            ) {
+                Icon(
+                    Icons.Filled.School,
+                    contentDescription = null,
+                    tint = IslamicGold,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "Register as Maulana / Scholar",
+                    color = IslamicGoldLight,
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp
                 )
