@@ -32,7 +32,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maeen.mahfilhub.ui.theme.*
+import com.maeen.mahfilhub.ui.viewmodel.MaulanaSignupViewModel
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -45,36 +47,33 @@ import kotlin.math.sin
 @Composable
 fun MaulanaSignupScreen(
     modifier: Modifier = Modifier,
+    viewModel: MaulanaSignupViewModel = viewModel(),
     onSignupSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val uiState by viewModel.uiState.collectAsState()
 
-    // ── Step tracking ────────────────────────────────────────────────
-    var currentStep by remember { mutableIntStateOf(0) }
-    val totalSteps = 3
+    // ── React to success / error messages ────────────────────────────
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearSuccess()
+            onSignupSuccess()
+        }
+    }
 
-    // ── Step 1: Account Info ─────────────────────────────────────────
-    var fullName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearError()
+        }
+    }
 
-    // ── Step 2: Scholar Profile ──────────────────────────────────────
-    var title by remember { mutableStateOf("") }
-    var specialization by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var experience by remember { mutableStateOf("") }
-    var qualification by remember { mutableStateOf("") }
-
-    // ── Step 3: Bio & Verification ───────────────────────────────────
-    var bio by remember { mutableStateOf("") }
-    var referenceContact by remember { mutableStateOf("") }
-    var agreeTerms by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
+    val currentStep = uiState.currentStep
+    val totalSteps = uiState.totalSteps
+    val isLoading = uiState.isLoading
 
     val stepTitles = listOf("Account Info", "Scholar Profile", "Bio & Verification")
     val stepSubtitles = listOf(
@@ -116,7 +115,7 @@ fun MaulanaSignupScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = {
-                    if (currentStep > 0) currentStep-- else onBack()
+                    if (!viewModel.goToPreviousStep()) onBack()
                 }) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
@@ -216,24 +215,36 @@ fun MaulanaSignupScreen(
                 ) {
                     when (step) {
                         0 -> MaulanaStep1(
-                            fullName, { fullName = it },
-                            email, { email = it },
-                            phone, { phone = it },
-                            password, { password = it },
-                            confirmPassword, { confirmPassword = it },
-                            passwordVisible, { passwordVisible = !passwordVisible }
+                            uiState.fullName, viewModel::onFullNameChange,
+                            uiState.email, viewModel::onEmailChange,
+                            uiState.phone, viewModel::onPhoneChange,
+                            uiState.password, viewModel::onPasswordChange,
+                            uiState.confirmPassword, viewModel::onConfirmPasswordChange,
+                            uiState.passwordVisible, viewModel::togglePasswordVisibility,
+                            fullNameError = uiState.fullNameError,
+                            emailError = uiState.emailError,
+                            phoneError = uiState.phoneError,
+                            passwordError = uiState.passwordError,
+                            confirmPasswordError = uiState.confirmPasswordError
                         )
                         1 -> MaulanaStep2(
-                            title, { title = it },
-                            specialization, { specialization = it },
-                            location, { location = it },
-                            experience, { experience = it },
-                            qualification, { qualification = it }
+                            uiState.title, viewModel::onTitleChange,
+                            uiState.specialization, viewModel::onSpecializationChange,
+                            uiState.location, viewModel::onLocationChange,
+                            uiState.experience, viewModel::onExperienceChange,
+                            uiState.qualification, viewModel::onQualificationChange,
+                            titleError = uiState.titleError,
+                            specializationError = uiState.specializationError,
+                            locationError = uiState.locationError,
+                            experienceError = uiState.experienceError,
+                            qualificationError = uiState.qualificationError
                         )
                         2 -> MaulanaStep3(
-                            bio, { bio = it },
-                            referenceContact, { referenceContact = it },
-                            agreeTerms, { agreeTerms = it }
+                            uiState.bio, viewModel::onBioChange,
+                            uiState.referenceContact, viewModel::onReferenceContactChange,
+                            uiState.agreeTerms, viewModel::onAgreeTermsChange,
+                            bioError = uiState.bioError,
+                            referenceContactError = uiState.referenceContactError
                         )
                     }
                 }
@@ -245,7 +256,7 @@ fun MaulanaSignupScreen(
             if (currentStep < totalSteps - 1) {
                 // Next button
                 Button(
-                    onClick = { currentStep++ },
+                    onClick = { viewModel.goToNextStep() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
@@ -286,7 +297,7 @@ fun MaulanaSignupScreen(
             } else {
                 // Submit button
                 Button(
-                    onClick = { onSignupSuccess() },
+                    onClick = { viewModel.submitSignup() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
@@ -298,13 +309,13 @@ fun MaulanaSignupScreen(
                         disabledContentColor = Color.White.copy(alpha = 0.4f)
                     ),
                     contentPadding = PaddingValues(),
-                    enabled = agreeTerms
+                    enabled = uiState.isSubmitEnabled
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
-                                brush = if (agreeTerms)
+                                brush = if (uiState.isSubmitEnabled)
                                     Brush.horizontalGradient(listOf(PrimaryTeal, PrimaryTealLight))
                                 else
                                     Brush.horizontalGradient(
@@ -390,12 +401,17 @@ private fun MaulanaStep1(
     phone: String, onPhoneChange: (String) -> Unit,
     password: String, onPasswordChange: (String) -> Unit,
     confirmPassword: String, onConfirmPasswordChange: (String) -> Unit,
-    passwordVisible: Boolean, onTogglePasswordVisibility: () -> Unit
+    passwordVisible: Boolean, onTogglePasswordVisibility: () -> Unit,
+    fullNameError: String? = null,
+    emailError: String? = null,
+    phoneError: String? = null,
+    passwordError: String? = null,
+    confirmPasswordError: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        MaulanaField("Full Name", fullName, onFullNameChange, "Enter your full name", Icons.Outlined.Person)
-        MaulanaField("Email Address", email, onEmailChange, "Enter your email", Icons.Outlined.Email)
-        MaulanaField("Phone Number", phone, onPhoneChange, "+880 1XX-XXXX-XXX", Icons.Outlined.Phone)
+        MaulanaField("Full Name", fullName, onFullNameChange, "Enter your full name", Icons.Outlined.Person, error = fullNameError)
+        MaulanaField("Email Address", email, onEmailChange, "Enter your email", Icons.Outlined.Email, error = emailError)
+        MaulanaField("Phone Number", phone, onPhoneChange, "+880 1XX-XXXX-XXX", Icons.Outlined.Phone, error = phoneError)
 
         // Password
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -413,14 +429,22 @@ private fun MaulanaStep1(
                         )
                     }
                 },
+                isError = passwordError != null,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(), singleLine = true,
                 shape = RoundedCornerShape(14.dp), colors = maulanaFieldColors()
             )
+            if (passwordError != null) {
+                Text(
+                    text = passwordError, fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                )
+            }
         }
 
         MaulanaField("Confirm Password", confirmPassword, onConfirmPasswordChange, "Re-enter password", Icons.Outlined.Lock,
-            isPassword = true)
+            isPassword = true, error = confirmPasswordError)
     }
 }
 
@@ -434,26 +458,31 @@ private fun MaulanaStep2(
     specialization: String, onSpecializationChange: (String) -> Unit,
     location: String, onLocationChange: (String) -> Unit,
     experience: String, onExperienceChange: (String) -> Unit,
-    qualification: String, onQualificationChange: (String) -> Unit
+    qualification: String, onQualificationChange: (String) -> Unit,
+    titleError: String? = null,
+    specializationError: String? = null,
+    locationError: String? = null,
+    experienceError: String? = null,
+    qualificationError: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // Section header
         SectionLabel(icon = Icons.Filled.School, text = "Academic & Professional Details")
 
         MaulanaField("Title / Designation", title, onTitleChange,
-            "e.g. Senior Scholar, Hafiz & Qari", Icons.Outlined.Badge)
+            "e.g. Senior Scholar, Hafiz & Qari", Icons.Outlined.Badge, error = titleError)
         MaulanaField("Specialization", specialization, onSpecializationChange,
-            "e.g. Tafseer & Hadith, Fiqh", Icons.Outlined.AutoStories)
+            "e.g. Tafseer & Hadith, Fiqh", Icons.Outlined.AutoStories, error = specializationError)
         MaulanaField("Highest Qualification", qualification, onQualificationChange,
-            "e.g. Dawra-e-Hadith, Kamil", Icons.Outlined.WorkspacePremium)
+            "e.g. Dawra-e-Hadith, Kamil", Icons.Outlined.WorkspacePremium, error = qualificationError)
         MaulanaField("Years of Experience", experience, onExperienceChange,
-            "e.g. 10", Icons.Outlined.Timer)
+            "e.g. 10", Icons.Outlined.Timer, error = experienceError)
 
         Spacer(modifier = Modifier.height(4.dp))
         SectionLabel(icon = Icons.Filled.LocationOn, text = "Location")
 
         MaulanaField("City & Country", location, onLocationChange,
-            "e.g. Dhaka, Bangladesh", Icons.Outlined.Place)
+            "e.g. Dhaka, Bangladesh", Icons.Outlined.Place, error = locationError)
     }
 }
 
@@ -465,7 +494,9 @@ private fun MaulanaStep2(
 private fun MaulanaStep3(
     bio: String, onBioChange: (String) -> Unit,
     referenceContact: String, onReferenceContactChange: (String) -> Unit,
-    agreeTerms: Boolean, onAgreeTermsChange: (Boolean) -> Unit
+    agreeTerms: Boolean, onAgreeTermsChange: (Boolean) -> Unit,
+    bioError: String? = null,
+    referenceContactError: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionLabel(icon = Icons.Filled.Description, text = "About You")
@@ -477,22 +508,29 @@ private fun MaulanaStep3(
             OutlinedTextField(
                 value = bio, onValueChange = onBioChange,
                 placeholder = { Text("Tell the community about yourself, your journey and teachings…", color = MutedText) },
+                isError = bioError != null,
                 modifier = Modifier.fillMaxWidth().height(140.dp),
                 maxLines = 6, shape = RoundedCornerShape(14.dp),
                 colors = maulanaFieldColors()
             )
-            Text(
-                text = "${bio.length}/500",
-                fontSize = 11.sp, color = MutedText,
-                modifier = Modifier.align(Alignment.End).padding(top = 4.dp, end = 4.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp, start = 4.dp, end = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                if (bioError != null) {
+                    Text(text = bioError, fontSize = 11.sp, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Spacer(modifier = Modifier.width(0.dp))
+                }
+                Text(text = "${bio.length}/500", fontSize = 11.sp, color = MutedText)
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
         SectionLabel(icon = Icons.Filled.VerifiedUser, text = "Verification")
 
         MaulanaField("Reference Contact", referenceContact, onReferenceContactChange,
-            "Phone or email of a known scholar", Icons.Outlined.Contacts)
+            "Phone or email of a known scholar", Icons.Outlined.Contacts, error = referenceContactError)
 
         // Info card
         Surface(
@@ -549,7 +587,8 @@ private fun SectionLabel(icon: androidx.compose.ui.graphics.vector.ImageVector, 
 private fun MaulanaField(
     label: String, value: String, onValueChange: (String) -> Unit,
     placeholder: String, icon: androidx.compose.ui.graphics.vector.ImageVector,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    error: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = SubtleText,
@@ -558,10 +597,18 @@ private fun MaulanaField(
             value = value, onValueChange = onValueChange,
             placeholder = { Text(placeholder, color = MutedText) },
             leadingIcon = { Icon(icon, null, tint = IslamicGold, modifier = Modifier.size(20.dp)) },
+            isError = error != null,
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             modifier = Modifier.fillMaxWidth(), singleLine = true,
             shape = RoundedCornerShape(14.dp), colors = maulanaFieldColors()
         )
+        if (error != null) {
+            Text(
+                text = error, fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+            )
+        }
     }
 }
 
