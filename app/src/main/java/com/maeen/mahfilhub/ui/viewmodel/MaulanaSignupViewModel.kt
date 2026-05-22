@@ -3,6 +3,10 @@ package com.maeen.mahfilhub.ui.viewmodel
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maeen.mahfilhub.data.model.MaulanaSignupRequest
+import com.maeen.mahfilhub.data.model.MaulanaSignupResponse
+import com.maeen.mahfilhub.data.repository.MaulanaRepository
+import com.maeen.mahfilhub.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,6 +47,7 @@ data class MaulanaSignupUiState(
     // ── Submission State ─────────────────────────────────────────────
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val signupResponse: MaulanaSignupResponse? = null,
     val successMessage: String? = null,
 
     // ── Field Validation Errors ──────────────────────────────────────
@@ -74,6 +79,8 @@ data class MaulanaSignupUiState(
  * repository call once the backend API endpoint is available.
  */
 class MaulanaSignupViewModel : ViewModel() {
+
+    private val maulanaRepository = MaulanaRepository()
 
     private val _uiState = MutableStateFlow(MaulanaSignupUiState())
     val uiState: StateFlow<MaulanaSignupUiState> = _uiState.asStateFlow()
@@ -358,34 +365,39 @@ class MaulanaSignupViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            // TODO: Replace with real repository call, e.g.:
-            // val result = maulanaRepository.register(
-            //     MaulanaSignupRequest(
-            //         fullName = state.fullName,
-            //         email = state.email,
-            //         phone = state.phone,
-            //         password = state.password,
-            //         title = state.title,
-            //         specialization = state.specialization,
-            //         location = state.location,
-            //         experience = state.experience,
-            //         qualification = state.qualification,
-            //         bio = state.bio,
-            //         referenceContact = state.referenceContact
-            //     )
-            // )
-            // when (result) {
-            //     is Resource.Success -> { ... }
-            //     is Resource.Error -> { ... }
-            // }
+            val request = MaulanaSignupRequest(
+                fullName = state.fullName,
+                email = state.email,
+                phone = state.phone,
+                password = state.password,
+                title = state.title,
+                specialization = state.specialization,
+                location = state.location,
+                experience = state.experience,
+                qualification = state.qualification,
+                bio = state.bio,
+                referenceContact = state.referenceContact
+            )
 
-            // Simulated success for now
-            kotlinx.coroutines.delay(1500)
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    successMessage = "Application submitted successfully!"
-                )
+            when (val result = maulanaRepository.register(request)) {
+                is Resource.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            successMessage = result.data.message ?: "Application submitted successfully!",
+                            signupResponse = result.data
+                        )
+                    }
+                }
+                is Resource.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = result.message
+                        )
+                    }
+                }
+                is Resource.Loading -> { /* handled by isLoading flag */ }
             }
         }
     }
