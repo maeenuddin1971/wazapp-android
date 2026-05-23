@@ -28,8 +28,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maeen.mahfilhub.R
 import com.maeen.mahfilhub.ui.theme.*
+import com.maeen.mahfilhub.ui.viewmodel.ProfileViewModel
 
 // ──────────────────────────────────────────────────────────────────────────
 // Profile Screen
@@ -39,6 +41,7 @@ import com.maeen.mahfilhub.ui.theme.*
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
+    profileViewModel: ProfileViewModel = viewModel(),
     onNotificationsClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
     onPrivacySecurityClick: () -> Unit = {},
@@ -52,15 +55,35 @@ fun ProfileScreen(
     onLogoutClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {}
 ) {
+    val profileState by profileViewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Show error as snackbar
+    LaunchedEffect(profileState.errorMessage) {
+        profileState.errorMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            profileViewModel.clearError()
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
     LazyColumn(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = Spacing.medium)
     ) {
         // ── Profile Header ───────────────────────────────────────────
         item {
-            ProfileHeader(onSettingsClick = onSettingsClick)
+            ProfileHeader(
+                displayName = profileState.displayName,
+                displayEmail = profileState.displayEmail,
+                displayInitial = profileState.displayInitial,
+                roleBadge = profileState.roleBadge,
+                isVerified = profileState.isVerified,
+                isLoading = profileState.isLoading,
+                onSettingsClick = onSettingsClick
+            )
         }
 
         // ── Stats Row ────────────────────────────────────────────────
@@ -221,6 +244,14 @@ fun ProfileScreen(
             )
         }
     }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .navigationBarsPadding()
+    )
+    } // end Box
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -228,7 +259,15 @@ fun ProfileScreen(
 // ══════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun ProfileHeader(onSettingsClick: () -> Unit = {}) {
+private fun ProfileHeader(
+    displayName: String = "Guest",
+    displayEmail: String = "",
+    displayInitial: String = "?",
+    roleBadge: String = "Member",
+    isVerified: Boolean = false,
+    isLoading: Boolean = false,
+    onSettingsClick: () -> Unit = {}
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -309,12 +348,20 @@ private fun ProfileHeader(onSettingsClick: () -> Unit = {}) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "A",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = displayInitial,
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
 
                 // Camera edit badge
                 Box(
@@ -340,21 +387,21 @@ private fun ProfileHeader(onSettingsClick: () -> Unit = {}) {
 
             // Name & email
             Text(
-                text = "Abdullah Ahmed",
+                text = displayName,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
             Spacer(modifier = Modifier.height(Spacing.extraSmall))
             Text(
-                text = "abdullah.ahmed@email.com",
+                text = displayEmail,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.7f)
             )
 
             Spacer(modifier = Modifier.height(Spacing.small))
 
-            // Member badge
+            // Role badge with verified indicator
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = AccentOrange.copy(alpha = 0.2f)
@@ -365,13 +412,13 @@ private fun ProfileHeader(onSettingsClick: () -> Unit = {}) {
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Star,
+                        imageVector = if (isVerified) Icons.Filled.Verified else Icons.Filled.Star,
                         contentDescription = null,
                         tint = AccentOrange,
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        text = "Premium Member",
+                        text = roleBadge,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = AccentOrange
