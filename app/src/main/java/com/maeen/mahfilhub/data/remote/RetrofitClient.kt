@@ -65,4 +65,7 @@ object RetrofitClient {
 
     val userApiService: UserApiService
         get() = getAuthRetrofit().create(UserApiService::class.java)
+
+    val mahfilApiService: MahfilApiService
+        get() = getAuthRetrofit().create(MahfilApiService::class.java)
 }

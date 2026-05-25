@@ -124,6 +124,9 @@ fun HomeScreen(
             when (page) {
                 0 -> HomeContent(
                     upcomingEvents = eventsState.upcomingEvents,
+                    isLoadingEvents = eventsState.isLoading,
+                    eventsError = eventsState.errorMessage,
+                    onRetryEvents = { eventsViewModel.refresh() },
                     featuredMaulanas = maulanaState.featuredMaulanas,
                     onEventClick = onEventClick,
                     onMaulanaClick = onMaulanaClick,
@@ -153,6 +156,9 @@ fun HomeScreen(
                 )
                 else -> HomeContent(
                     upcomingEvents = eventsState.upcomingEvents,
+                    isLoadingEvents = eventsState.isLoading,
+                    eventsError = eventsState.errorMessage,
+                    onRetryEvents = { eventsViewModel.refresh() },
                     featuredMaulanas = maulanaState.featuredMaulanas,
                     onEventClick = onEventClick,
                     onMaulanaClick = onMaulanaClick,
@@ -171,6 +177,9 @@ fun HomeScreen(
 private fun HomeContent(
     modifier: Modifier = Modifier,
     upcomingEvents: List<EventItem> = emptyList(),
+    isLoadingEvents: Boolean = false,
+    eventsError: String? = null,
+    onRetryEvents: () -> Unit = {},
     featuredMaulanas: List<MaulanaItem> = emptyList(),
     onEventClick: (Int) -> Unit = {},
     onMaulanaClick: (Int) -> Unit = {},
@@ -186,6 +195,9 @@ private fun HomeContent(
         QuickActionsSection()
         UpcomingEventsSection(
             events = upcomingEvents,
+            isLoading = isLoadingEvents,
+            errorMessage = eventsError,
+            onRetry = onRetryEvents,
             onEventClick = onEventClick
         )
         FeaturedMaulanaSection(
@@ -415,6 +427,9 @@ private fun QuickActionItem(action: QuickAction) {
 @Composable
 private fun UpcomingEventsSection(
     events: List<EventItem> = emptyList(),
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    onRetry: () -> Unit = {},
     onEventClick: (Int) -> Unit = {}
 ) {
     Column(
@@ -447,22 +462,160 @@ private fun UpcomingEventsSection(
 
         Spacer(modifier = Modifier.height(Spacing.small))
 
-        // Horizontal scrolling event cards — driven by ViewModel data
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.medium),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.medium)
-        ) {
-            events.forEach { event ->
-                EventCard(
-                    title = event.title,
-                    maulana = event.maulana,
-                    location = event.location,
-                    date = event.date,
-                    time = event.time,
-                    isLive = event.isLive,
-                    onClick = { onEventClick(event.id) }
+        when {
+            // Loading state: shimmer placeholders
+            isLoading && events.isEmpty() -> {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = Spacing.medium),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.medium)
+                ) {
+                    repeat(3) {
+                        EventCardShimmer()
+                    }
+                }
+            }
+            // Error state with retry
+            errorMessage != null && events.isEmpty() -> {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.medium),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(Spacing.large),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.small))
+                        Text(
+                            text = "Couldn't load events",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.small))
+                        TextButton(onClick = onRetry) {
+                            Text("Tap to retry", color = PrimaryTeal)
+                        }
+                    }
+                }
+            }
+            // Data loaded: show event cards
+            else -> {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = Spacing.medium),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.medium)
+                ) {
+                    events.forEach { event ->
+                        EventCard(
+                            title = event.title,
+                            maulana = event.maulana,
+                            location = event.location,
+                            date = event.date,
+                            time = event.time,
+                            isLive = event.isLive,
+                            onClick = { onEventClick(event.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EventCardShimmer() {
+    val shimmerAnim = rememberInfiniteTransition(label = "shimmer")
+    val shimmerAlpha by shimmerAnim.animateFloat(
+        initialValue = 0.15f,
+        targetValue = 0.35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+    val shimmerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = shimmerAlpha)
+
+    Card(
+        modifier = Modifier
+            .width(280.dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = CardShadow,
+                spotColor = CardShadow
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column {
+            // Top accent strip placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(PrimaryTeal.copy(alpha = 0.3f), PrimaryTealDark.copy(alpha = 0.3f))
+                        )
+                    )
+            )
+
+            // Content placeholders
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.medium)
+                    .padding(top = Spacing.small)
+            ) {
+                // Title placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(18.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(shimmerColor)
+                )
+                Spacer(modifier = Modifier.height(Spacing.medium))
+                // Maulana placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(shimmerColor)
+                )
+                Spacer(modifier = Modifier.height(Spacing.small))
+                // Location placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(shimmerColor)
+                )
+                Spacer(modifier = Modifier.height(Spacing.small))
+                // Time placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.3f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(shimmerColor)
                 )
             }
         }

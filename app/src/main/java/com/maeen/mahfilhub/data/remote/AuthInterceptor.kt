@@ -5,10 +5,8 @@ import com.maeen.mahfilhub.util.SessionManager
 import okhttp3.Interceptor
 import okhttp3.Response
 
-/**
- * OkHttp interceptor that attaches the Bearer token from
- * [SessionManager] to every outgoing request (except /auth/* endpoints).
- */
+// OkHttp interceptor that attaches the Bearer token from
+// SessionManager to every outgoing request (except auth endpoints).
 class AuthInterceptor(private val context: Context) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {

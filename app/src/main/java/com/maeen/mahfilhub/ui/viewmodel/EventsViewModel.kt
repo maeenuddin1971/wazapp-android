@@ -1,11 +1,16 @@
 package com.maeen.mahfilhub.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.maeen.mahfilhub.data.model.EventItem
+import com.maeen.mahfilhub.data.model.MahfilListRequest
+import com.maeen.mahfilhub.data.repository.MahfilRepository
+import com.maeen.mahfilhub.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * UI state for screens that consume event data.
@@ -20,27 +25,100 @@ data class EventsUiState(
     val filters: List<String> = listOf("All", "Today", "This Week", "This Month"),
     val filteredEvents: List<EventItem> = emptyList(),
     val liveCount: Int = 0,
-    val upcomingEvents: List<EventItem> = emptyList()
+    val upcomingEvents: List<EventItem> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val currentPage: Int = 0,
+    val totalPages: Int = 0,
+    val hasMore: Boolean = false
 )
 
 /**
  * Shared ViewModel powering HomeScreen (upcoming events), EventsScreen
  * (full list + filter + search), and EventDetailScreen (lookup by ID).
  *
- * Follows the same StateFlow pattern established by [LoginViewModel].
- * Seed data matches the iOS `EventsViewModel` for feature parity.
+ * Fetches mahfils from POST /mahfil/list on init.
+ * Falls back to seed data if the API call fails.
  */
 class EventsViewModel : ViewModel() {
+
+    private val mahfilRepository = MahfilRepository()
 
     private val _uiState = MutableStateFlow(EventsUiState())
     val uiState: StateFlow<EventsUiState> = _uiState.asStateFlow()
 
     init {
-        _uiState.update { it.copy(events = seedEvents) }
-        recompute()
+        loadMahfils()
     }
 
     // ── Public Actions ───────────────────────────────────────────────────
+
+    fun loadMahfils(page: Int = 0) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            val request = MahfilListRequest(
+                maolanaName = "",
+                page = page,
+                size = 20
+            )
+
+            when (val result = mahfilRepository.getMahfilList(request)) {
+                is Resource.Success -> {
+                    val pageData = result.data
+                    val newEvents = pageData.content.map { it.toEventItem() }
+
+                    _uiState.update { state ->
+                        val allEvents = if (page == 0) {
+                            newEvents
+                        } else {
+                            state.events + newEvents
+                        }
+                        state.copy(
+                            events = allEvents,
+                            isLoading = false,
+                            currentPage = pageData.number,
+                            totalPages = pageData.totalPages,
+                            hasMore = !pageData.last
+                        )
+                    }
+                    recompute()
+                }
+                is Resource.Error -> {
+                    // If first page fails and no events loaded, use seed data
+                    if (page == 0 && _uiState.value.events.isEmpty()) {
+                        _uiState.update {
+                            it.copy(
+                                events = seedEvents,
+                                isLoading = false,
+                                errorMessage = result.message
+                            )
+                        }
+                        recompute()
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = result.message
+                            )
+                        }
+                    }
+                }
+                is Resource.Loading -> { /* handled by isLoading flag */ }
+            }
+        }
+    }
+
+    fun loadMore() {
+        val state = _uiState.value
+        if (!state.isLoading && state.hasMore) {
+            loadMahfils(page = state.currentPage + 1)
+        }
+    }
+
+    fun refresh() {
+        loadMahfils(page = 0)
+    }
 
     fun setFilter(filter: String) {
         _uiState.update { it.copy(selectedFilter = filter) }
@@ -50,6 +128,10 @@ class EventsViewModel : ViewModel() {
     fun setSearchQuery(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
         recompute()
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
     // ── Lookup Helpers ───────────────────────────────────────────────────
@@ -83,7 +165,7 @@ class EventsViewModel : ViewModel() {
         }
     }
 
-    // ── Seed Data (replace with API call later) ──────────────────────────
+    // ── Seed Data (offline fallback) ─────────────────────────────────────
 
     companion object {
         private val seedEvents = listOf(
@@ -139,37 +221,6 @@ class EventsViewModel : ViewModel() {
                 time = "After Isha",
                 attendees = 95,
                 category = "This Month"
-            ),
-            EventItem(
-                id = 6,
-                title = "Islamic Finance Workshop",
-                maulana = "Mufti Abdul Rahman",
-                location = "BICC, Dhaka",
-                date = "Mar 25, 2026",
-                time = "9:00 AM",
-                attendees = 75,
-                category = "This Month"
-            ),
-            EventItem(
-                id = 7,
-                title = "Milad-un-Nabi Program",
-                maulana = "Maulana Shah Ahmed",
-                location = "Khulna Boro Masjid",
-                date = "Mar 28, 2026",
-                time = "After Asr",
-                isFeatured = true,
-                attendees = 400,
-                category = "This Month"
-            ),
-            EventItem(
-                id = 8,
-                title = "Dua & Zikr Evening",
-                maulana = "Maulana Noor Islam",
-                location = "Comilla Central Mosque",
-                date = "Mar 14, 2026",
-                time = "After Maghrib",
-                attendees = 60,
-                category = "Today"
             )
         )
     }
