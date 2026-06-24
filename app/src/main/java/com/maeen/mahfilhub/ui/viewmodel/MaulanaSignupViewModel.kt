@@ -365,21 +365,24 @@ class MaulanaSignupViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            val yearsExp = state.experience.toIntOrNull() ?: 0
+
             val request = MaulanaSignupRequest(
                 fullName = state.fullName,
+                contactNumber = state.phone,
+                whatsappNumber = state.phone,         // default to same as contact
                 email = state.email,
-                phone = state.phone,
-                password = state.password,
-                title = state.title,
-                specialization = state.specialization,
-                location = state.location,
-                experience = state.experience,
-                qualification = state.qualification,
-                bio = state.bio,
-                referenceContact = state.referenceContact
+                address = state.location,
+                highestIslamicDegree = state.qualification,
+                specializationField = state.specialization,
+                designation = state.title.uppercase().replace(" ", "_"),
+                yearsOfExperience = yearsExp,
+                availableForLectures = true,
+                isVerified = false,
+                isActive = true
             )
 
-            when (val result = maulanaRepository.register(request)) {
+            when (val result = maulanaRepository.createMaulana(request)) {
                 is Resource.Success -> {
                     _uiState.update {
                         it.copy(

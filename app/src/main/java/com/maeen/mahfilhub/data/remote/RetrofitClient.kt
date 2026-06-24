@@ -33,7 +33,6 @@ object RetrofitClient {
         .build()
 
     val authApiService: AuthApiService = publicRetrofit.create(AuthApiService::class.java)
-    val maulanaApiService: MaulanaApiService = publicRetrofit.create(MaulanaApiService::class.java)
 
     // ── Authenticated client (with Bearer token) ────────────────────
     private var authenticatedRetrofit: Retrofit? = null
@@ -68,4 +67,7 @@ object RetrofitClient {
 
     val mahfilApiService: MahfilApiService
         get() = getAuthRetrofit().create(MahfilApiService::class.java)
+
+    val maulanaApiService: MaulanaApiService
+        get() = getAuthRetrofit().create(MaulanaApiService::class.java)
 }

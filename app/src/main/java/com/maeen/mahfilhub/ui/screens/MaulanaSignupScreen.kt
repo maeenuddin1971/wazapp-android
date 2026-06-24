@@ -48,7 +48,7 @@ import kotlin.math.sin
 fun MaulanaSignupScreen(
     modifier: Modifier = Modifier,
     viewModel: MaulanaSignupViewModel = viewModel(),
-    onSignupSuccess: (token: String, role: String) -> Unit = { _, _ -> },
+    onSignupSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
@@ -57,10 +57,10 @@ fun MaulanaSignupScreen(
 
     // ── React to success / error messages ────────────────────────────
     LaunchedEffect(uiState.signupResponse) {
-        uiState.signupResponse?.let { response ->
+        uiState.signupResponse?.let {
             snackbarHostState.showSnackbar(uiState.successMessage ?: "Application submitted!")
             viewModel.clearSuccess()
-            onSignupSuccess(response.token, response.role)
+            onSignupSuccess()
         }
     }
 

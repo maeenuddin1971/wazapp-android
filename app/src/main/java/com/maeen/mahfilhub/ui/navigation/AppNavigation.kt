@@ -245,8 +245,7 @@ fun AppNavDisplay(
                 metadata = slideMetadata()
             ) {
                 MaulanaSignupScreen(
-                    onSignupSuccess = { token, role ->
-                        SessionManager.login(context, token = token, role = role)
+                    onSignupSuccess = {
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     },

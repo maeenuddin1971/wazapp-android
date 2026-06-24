@@ -9,11 +9,16 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class MaulanaRepository {
 
-    private val api = RetrofitClient.maulanaApiService
+    private val api get() = RetrofitClient.maulanaApiService
 
-    suspend fun register(request: MaulanaSignupRequest): Resource<MaulanaSignupResponse> {
+    /**
+     * Create a new Maulana profile via POST /maolana/create.
+     * Uses the authenticated Retrofit client (JWT Bearer token attached
+     * automatically by AuthInterceptor).
+     */
+    suspend fun createMaulana(request: MaulanaSignupRequest): Resource<MaulanaSignupResponse> {
         return try {
-            val response = api.register(request)
+            val response = api.createMaulana(request)
             if (response.isSuccessful) {
                 response.body()?.let {
                     Resource.Success(it)
@@ -31,12 +36,12 @@ class MaulanaRepository {
     }
 
     private fun parseErrorMessage(errorBody: String?, statusCode: Int): String {
-        if (errorBody.isNullOrBlank()) return "Registration failed ($statusCode)"
+        if (errorBody.isNullOrBlank()) return "Maulana creation failed ($statusCode)"
         return try {
             val json = JSONObject(errorBody)
-            json.optString("message", "").ifBlank { "Registration failed ($statusCode)" }
+            json.optString("message", "").ifBlank { "Maulana creation failed ($statusCode)" }
         } catch (_: Exception) {
-            "Registration failed ($statusCode)"
+            "Maulana creation failed ($statusCode)"
         }
     }
 }

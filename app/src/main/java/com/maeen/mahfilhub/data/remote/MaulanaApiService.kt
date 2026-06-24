@@ -8,6 +8,10 @@ import retrofit2.http.POST
 
 interface MaulanaApiService {
 
-    @POST("auth/maulana/register")
-    suspend fun register(@Body request: MaulanaSignupRequest): Response<MaulanaSignupResponse>
+    /**
+     * Create a new Maulana profile.
+     * Requires JWT Bearer token (handled by AuthInterceptor).
+     */
+    @POST("maolana/create")
+    suspend fun createMaulana(@Body request: MaulanaSignupRequest): Response<MaulanaSignupResponse>
 }
