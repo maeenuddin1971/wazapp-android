@@ -19,7 +19,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"https://wazappbackend-1.onrender.com/\"")
+        buildConfigField("String", "BASE_URL", "\"http://54.179.194.23:8082/\"")
     }
 
     buildTypes {
