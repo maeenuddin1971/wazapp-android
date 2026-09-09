@@ -10,9 +10,12 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
-/app/release/
+app/*
+/app/release/*
 /app/google-services.json
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+/app/release/baselineProfiles/
+
