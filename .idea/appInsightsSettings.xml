@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.maeen.mahfilhub" />
+                  <option name="mobileSdkAppId" value="1:1084499561852:android:9eee1f771f997dd2b2a8f9" />
+                  <option name="projectId" value="mapexample-90267" />
+                  <option name="projectNumber" value="1084499561852" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
