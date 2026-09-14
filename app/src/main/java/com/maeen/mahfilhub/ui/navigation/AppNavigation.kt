@@ -228,7 +228,7 @@ fun AppNavDisplay(
             ) {
                 RegisterScreen(
                     onRegisterSuccess = {
-                        SessionManager.login(context, token = "", role = "ROLE_USER", email = "newuser@mahfilhub.com")
+                        // Token already saved by RegisterScreen — just navigate
                         backStack.clear()
                         backStack.add(AppScreen.Main)
                     },

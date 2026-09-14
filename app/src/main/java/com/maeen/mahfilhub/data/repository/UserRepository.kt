@@ -10,9 +10,9 @@ class UserRepository {
 
     private val api = RetrofitClient.userApiService
 
-    suspend fun getProfile(): Resource<UserProfileResponse> {
+    suspend fun getProfile(token: String): Resource<UserProfileResponse> {
         return try {
-            val response = api.getProfile()
+            val response = api.getProfile(token)
             if (response.isSuccessful) {
                 response.body()?.let {
                     Resource.Success(it)

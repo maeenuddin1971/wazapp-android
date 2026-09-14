@@ -1,10 +1,12 @@
 package com.maeen.mahfilhub.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maeen.mahfilhub.data.model.UserProfileResponse
 import com.maeen.mahfilhub.data.repository.UserRepository
 import com.maeen.mahfilhub.util.Resource
+import com.maeen.mahfilhub.util.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,8 @@ data class ProfileUiState(
     val displayInitial: String get() = profile?.initial ?: "?"
     val isMaolana: Boolean get() = profile?.isMaolana == true
     val isVerified: Boolean get() = profile?.isVerified == true
+    val locationDisplay: String get() = profile?.locationDisplay ?: "Not set"
+    val contactNumber: String get() = profile?.contactNumber ?: "Not set"
     val roleBadge: String
         get() = when (profile?.role) {
             "ISLAMIC_CLERIC" -> "Scholar"
@@ -36,9 +40,10 @@ data class ProfileUiState(
 
 /**
  * ViewModel for the Profile screen.
- * Fetches user profile from GET /user/profile on init.
+ * Fetches user profile from GET /user/profile on init,
+ * passing the saved JWT token explicitly.
  */
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepository = UserRepository()
 
@@ -50,10 +55,18 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun loadProfile() {
+        val token = SessionManager.getToken(getApplication())
+        if (token.isNullOrBlank()) {
+            _uiState.update {
+                it.copy(isLoading = false, errorMessage = "Not logged in")
+            }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = userRepository.getProfile()) {
+            when (val result = userRepository.getProfile(token)) {
                 is Resource.Success -> {
                     _uiState.update {
                         it.copy(

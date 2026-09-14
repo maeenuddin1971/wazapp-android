@@ -11,7 +11,7 @@ open class UserProfileResponse(
     val id: String = "",
     val fullName: String = "",
     val email: String = "",
-    val contactNumber: String = "",
+    val contactNumber: String? = null,
     val profilePhotoUrl: String? = null,
     val userId: String = "",
     val role: String = "",

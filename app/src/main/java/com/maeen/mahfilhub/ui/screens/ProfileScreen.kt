@@ -188,7 +188,7 @@ fun ProfileScreen(
                     ProfileMenuItem(
                         icon = Icons.Outlined.LocationOn,
                         title = "Location",
-                        subtitle = "Dhaka, Bangladesh",
+                        subtitle = profileState.locationDisplay,
                         color = SecondaryGreen
                     )
                 )
