@@ -54,7 +54,7 @@ fun NotificationDetailScreen(
     notificationsViewModel: NotificationsViewModel = viewModel(),
     onBack: () -> Unit = {},
     onEventClick: ((Int) -> Unit)? = null,
-    onMaulanaClick: ((Int) -> Unit)? = null
+    onMaulanaClick: ((String) -> Unit)? = null
 ) {
     val notification = remember {
         notificationsViewModel.notificationById(notificationId)
@@ -212,7 +212,7 @@ fun NotificationDetailScreen(
                                     NotificationType.EVENT, NotificationType.REMINDER ->
                                         onEventClick?.invoke(notification.relatedId)
                                     NotificationType.MAULANA ->
-                                        onMaulanaClick?.invoke(notification.relatedId)
+                                        onMaulanaClick?.invoke(notification.relatedId.toString())
                                     else -> {}
                                 }
                             },

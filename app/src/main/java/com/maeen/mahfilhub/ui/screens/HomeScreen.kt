@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onEventClick: (Int) -> Unit = {},
-    onMaulanaClick: (Int) -> Unit = {},
+    onMaulanaClick: (String) -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
     onPrivacySecurityClick: () -> Unit = {},
@@ -182,7 +182,7 @@ private fun HomeContent(
     onRetryEvents: () -> Unit = {},
     featuredMaulanas: List<MaulanaItem> = emptyList(),
     onEventClick: (Int) -> Unit = {},
-    onMaulanaClick: (Int) -> Unit = {},
+    onMaulanaClick: (String) -> Unit = {},
     onNotificationsClick: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
@@ -831,7 +831,7 @@ private fun EventCard(
 @Composable
 private fun FeaturedMaulanaSection(
     maulanas: List<MaulanaItem> = emptyList(),
-    onMaulanaClick: (Int) -> Unit = {}
+    onMaulanaClick: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier

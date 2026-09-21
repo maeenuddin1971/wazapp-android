@@ -53,7 +53,7 @@ private fun formatFollowerCount(count: Int): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaulanaDetailScreen(
-    maulanaId: Int,
+    maulanaId: String,
     modifier: Modifier = Modifier,
     maulanaViewModel: MaulanaViewModel = viewModel(),
     eventsViewModel: EventsViewModel = viewModel(),
@@ -671,7 +671,7 @@ private fun MaulanaEventMiniCard(
 @Composable
 private fun MaulanaDetailScreenPreview() {
     MahfilHubTheme {
-        MaulanaDetailScreen(maulanaId = 1)
+        MaulanaDetailScreen(maulanaId = "1")
     }
 }
 
@@ -679,6 +679,6 @@ private fun MaulanaDetailScreenPreview() {
 @Composable
 private fun MaulanaDetailScreenDarkPreview() {
     MahfilHubTheme(darkTheme = true) {
-        MaulanaDetailScreen(maulanaId = 2)
+        MaulanaDetailScreen(maulanaId = "2")
     }
 }

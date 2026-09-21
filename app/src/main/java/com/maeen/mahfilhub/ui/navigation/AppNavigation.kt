@@ -42,7 +42,7 @@ sealed interface AppScreen {
     data class EventDetail(val eventId: Int) : AppScreen
 
     @Serializable
-    data class MaulanaDetail(val maulanaId: Int) : AppScreen
+    data class MaulanaDetail(val maulanaId: String) : AppScreen
 
     @Serializable
     data object Notifications : AppScreen
@@ -409,7 +409,7 @@ fun AppNavDisplay(
                         backStack.removeLastOrNull()
                     },
                     onScholarClick = { maulanaId ->
-                        backStack.add(AppScreen.MaulanaDetail(maulanaId))
+                        backStack.add(AppScreen.MaulanaDetail(maulanaId.toString()))
                     }
                 )
             }

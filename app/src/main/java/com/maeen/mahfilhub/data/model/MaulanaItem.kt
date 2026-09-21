@@ -4,11 +4,10 @@ package com.maeen.mahfilhub.data.model
  * Domain model for a Maulana (Islamic scholar) in MahfilHub.
  * Used across HomeScreen, MaulanaScreen, and MaulanaDetailScreen.
  *
- * NOTE: This replaces the inline `MaulanaItem` data class that was previously
- * defined inside MaulanaScreen.kt.
+ * Mapped from [MaulanaApiItem] in the repository layer.
  */
 data class MaulanaItem(
-    val id: Int,
+    val id: String,
     val name: String,
     val title: String,
     val specialization: String,
@@ -19,5 +18,7 @@ data class MaulanaItem(
     val rating: Float,
     val isVerified: Boolean = false,
     val isFollowing: Boolean = false,
-    val category: String = "All"
+    val category: String = "All",
+    val contactNumber: String? = null,
+    val uniqueIdentifier: String? = null
 )

@@ -101,7 +101,7 @@ import com.maeen.mahfilhub.ui.theme.VerifiedBadge
 fun MaulanaScreen(
     modifier: Modifier = Modifier,
     maulanaViewModel: MaulanaViewModel = viewModel(),
-    onMaulanaClick: (Int) -> Unit = {}
+    onMaulanaClick: (String) -> Unit = {}
 ) {
     val state by maulanaViewModel.uiState.collectAsState()
 
